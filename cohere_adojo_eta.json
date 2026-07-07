@@ -1,0 +1,9 @@
+{
+ "judge": "command-a",
+ "set": "AgentDojo",
+ "n_flag": 27,
+ "theta_star": 0.5,
+ "benign_miss": 0.0,
+ "attacked_miss": 0.6666666666666666,
+ "eta": 0.6666666666666666
+}

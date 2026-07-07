@@ -1,0 +1,16 @@
+{
+ "panel": [
+  "Gemma-9B",
+  "Llama-70B",
+  "gpt-4o-mini",
+  "command-a",
+  "deepseek-v4",
+  "qwen3.5-122b"
+ ],
+ "n_items": 132,
+ "n_viol": 35,
+ "mean_gold_auc": 0.8081492390770743,
+ "fleiss_kappa": 0.7419537184243067,
+ "mean_pairwise_judge_auc": 0.9369763521572647,
+ "frac_viol_minority_flagged": 0.22857142857142856
+}

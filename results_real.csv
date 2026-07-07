@@ -1,0 +1,5 @@
+delta,realized_miss,miss_std,utility_loss,pass
+0.05,0.0000,0.0000,1.0000,True
+0.1,0.0695,0.0834,0.5837,True
+0.2,0.1184,0.0876,0.1540,True
+0.3,0.1461,0.0673,0.0923,True

@@ -40,29 +40,36 @@ JUDGES = [("qwen2.5:3b", "Qwen-3B",  "#0072B2", "-",  "o"),
           ("gemma2:9b",  "Gemma-9B", "#CC79A7", "-",  "D"),
           ("llama3.3:70b","Llama-70B","#56B4E9", "--", "P")]
 
-fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.4, 3.9))
-panels = [
-    (a1, lambda m: np.array([sc.get(f"{m}::{t}", np.nan) for t in cur_t]), cur_l, "curated", False),
-    (a2, lambda m: np.array([bc.get(f"{m}::::{t}", np.nan) for t in ben_t]), ben_l, "AgentDojo", True)]
-for ax, getfn, labels, title, inset in panels:
-    axin = None
-    if inset:
-        axin = inset_axes(ax, width="52%", height="52%", loc="lower right", borderpad=1.1)
+from matplotlib.lines import Line2D
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(9.4, 4.2))
+cur_s = {m: np.array([sc.get(f"{m}::{t}", np.nan) for t in cur_t]) for m, *_ in JUDGES}
+ben_s = {m: np.array([bc.get(f"{m}::::{t}", np.nan) for t in ben_t]) for m, *_ in JUDGES}
+panels = [(a1, cur_s, cur_l, "curated", False), (a2, ben_s, ben_l, "AgentDojo", True)]
+for ax, S, labels, title, inset in panels:
+    axin = inset_axes(ax, width="50%", height="50%", loc="lower right", borderpad=1.0) if inset else None
     for m, name, c, ls, mk in JUDGES:
-        s = getfn(m)
+        s = S[m]
         if np.isnan(s).any(): continue
         f, t = roc(s, labels)
-        ax.plot(f, t, ls, color=c, lw=1.9, marker=mk, markevery=18, markersize=5,
-                label=f"{name} ({auc(s,labels):.2f})")
+        ax.plot(f, t, ls, color=c, lw=1.9, marker=mk, markevery=18, markersize=5)
         if axin is not None:
             axin.plot(f, t, ls, color=c, lw=1.9, marker=mk, markevery=8, markersize=4)
     ax.plot([0, 1], [0, 1], "k:", lw=1, alpha=0.5)
     ax.set_xlabel("false-alarm rate"); ax.set_ylabel("true-positive rate")
     ax.set_title(title); ax.set_xlim(0, 1); ax.set_ylim(0, 1.02)
-    ax.legend(fontsize=9.5, loc="upper left", title="judge (AUC)", title_fontsize=9.5)
     if axin is not None:
         axin.set_xlim(0, 0.20); axin.set_ylim(0, 0.65)
         axin.set_title("low false-alarm region", fontsize=8.5)
         axin.tick_params(labelsize=7.5); axin.plot([0, 1], [0, 1], "k:", lw=0.8, alpha=0.4)
-fig.tight_layout(); fig.savefig(os.path.join(FIG, "roc.pdf")); plt.close()
-print("wrote figures/roc.pdf (colorblind-safe, low-FPR inset)")
+# single shared legend BELOW both panels (no overlap); AUC shown as curated/AgentDojo pair
+handles, texts = [], []
+for m, name, c, ls, mk in JUDGES:
+    if np.isnan(cur_s[m]).any() or np.isnan(ben_s[m]).any(): continue
+    handles.append(Line2D([0], [0], color=c, ls=ls, marker=mk, lw=1.9, markersize=5))
+    texts.append(f"{name} ({auc(cur_s[m],cur_l):.2f}/{auc(ben_s[m],ben_l):.2f})")
+fig.legend(handles, texts, loc="lower center", ncol=3, fontsize=9.5, frameon=False,
+           title="judge (curated AUC / AgentDojo AUC)", title_fontsize=9.5,
+           bbox_to_anchor=(0.5, -0.01))
+fig.subplots_adjust(left=0.07, right=0.98, top=0.92, bottom=0.30, wspace=0.22)
+fig.savefig(os.path.join(FIG, "roc.pdf"), bbox_inches="tight"); plt.close()
+print("wrote figures/roc.pdf (colorblind-safe, low-FPR inset, shared legend below)")

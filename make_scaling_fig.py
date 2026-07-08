@@ -59,18 +59,22 @@ for m,p,fam in JUDGES:
 
 fig,(axL,axR)=plt.subplots(1,2,figsize=(10.6,3.0))
 # left: AUC vs params
-for ds,key,mk_alpha,lbl in [("cur",3,1.0,"curated"),("adojo",4,0.45,"AgentDojo")]:
+# datasets are distinguished by marker FILL: curated = filled, AgentDojo = open (hollow)
+for ds,key,filled,lbl in [("cur",3,True,"curated"),("adojo",4,False,"AgentDojo")]:
     for m,p,fam,ca,ba,cu,bu in rows:
         y=ca if ds=="cur" else ba
         if np.isnan(y): continue
         if ds=="adojo" and m in bench_ci:   # bootstrap 95% CI error bars on the ceiling test
             lo,hi=bench_ci[m]
-            axL.errorbar(p,y,yerr=[[y-lo],[hi-y]],fmt="none",ecolor=FAM_C[fam],alpha=0.5,capsize=3,lw=1.1,zorder=2)
-        axL.scatter(p,y,c=FAM_C[fam],marker=FAM_M[fam],s=80,alpha=mk_alpha,edgecolors="k",linewidths=0.5,zorder=3)
+            axL.errorbar(p,y,yerr=[[y-lo],[hi-y]],fmt="none",ecolor=FAM_C[fam],alpha=0.6,capsize=3,lw=1.1,zorder=2)
+        axL.scatter(p,y,marker=FAM_M[fam],s=80,zorder=3,
+                    facecolors=(FAM_C[fam] if filled else "none"),
+                    edgecolors=("k" if filled else FAM_C[fam]),
+                    linewidths=(0.5 if filled else 1.5))
 # within-Qwen trend line per dataset
 for ds,idx in [("cur",3),("adojo",4)]:
     q=sorted([(p,(ca if ds=="cur" else ba)) for m,p,fam,ca,ba,cu,bu in rows if fam=="Qwen" and not np.isnan(ca if ds=="cur" else ba)])
-    axL.plot([p for p,_ in q],[y for _,y in q],c="#0072B2",lw=1.2,alpha=0.4 if ds=="adojo" else 0.9,zorder=1)
+    axL.plot([p for p,_ in q],[y for _,y in q],c="#0072B2",lw=1.2,ls=("--" if ds=="adojo" else "-"),alpha=0.7,zorder=1)
 axL.set_xscale("log"); axL.set_xlabel("judge size (B params, log)"); axL.set_ylabel("judge AUC")
 axL.set_xticks([0.5,3,7,9,32,70]); axL.set_xticklabels(["0.5","3","7","9","32","70"])
 axL.annotate("8B, 70B Llama < 9B Gemma\n(AgentDojo)",xy=(8,0.66),xytext=(1.2,0.55),fontsize=10.5,
@@ -78,16 +82,17 @@ axL.annotate("8B, 70B Llama < 9B Gemma\n(AgentDojo)",xy=(8,0.66),xytext=(1.2,0.5
 axL.set_ylim(0.45,1.02); axL.set_title("AUC is not monotone in size (AgentDojo bars: 95% CI)")
 # right: utility loss vs AUC (both datasets)
 for m,p,fam,ca,ba,cu,bu in rows:
-    axR.scatter(ca,cu,c=FAM_C[fam],marker=FAM_M[fam],s=80,alpha=1.0,edgecolors="k",linewidths=0.5,zorder=3)
-    if not np.isnan(ba): axR.scatter(ba,bu,c=FAM_C[fam],marker=FAM_M[fam],s=80,alpha=0.45,edgecolors="k",linewidths=0.5,zorder=3)
+    axR.scatter(ca,cu,marker=FAM_M[fam],s=80,zorder=3,facecolors=FAM_C[fam],edgecolors="k",linewidths=0.5)
+    if not np.isnan(ba):
+        axR.scatter(ba,bu,marker=FAM_M[fam],s=80,zorder=3,facecolors="none",edgecolors=FAM_C[fam],linewidths=1.5)
 axR.set_xlabel("judge AUC"); axR.set_ylabel(r"utility loss $U$ at $\delta=0.10$")
 axR.set_title(r"Utility loss falls with AUC, across families")
 axR.set_xlim(0.5,1.02); axR.set_ylim(-0.03,1.05)
 # family legend
 from matplotlib.lines import Line2D
 h=[Line2D([0],[0],marker=FAM_M[f],color="w",markerfacecolor=FAM_C[f],markeredgecolor="k",markersize=9,label=f) for f in FAM_C]
-h+=[Line2D([0],[0],marker="o",color="w",markerfacecolor="gray",markeredgecolor="k",markersize=9,alpha=1.0,label="curated"),
-    Line2D([0],[0],marker="o",color="w",markerfacecolor="gray",markeredgecolor="k",markersize=9,alpha=0.45,label="AgentDojo")]
+h+=[Line2D([0],[0],marker="o",color="w",markerfacecolor="0.35",markeredgecolor="k",markersize=9,label="curated (filled)"),
+    Line2D([0],[0],marker="o",color="w",markerfacecolor="none",markeredgecolor="0.35",markeredgewidth=1.5,markersize=9,label="AgentDojo (open)")]
 # single shared legend BELOW both panels (centered) so the figure is horizontally
 # symmetric; a right-side legend made bbox_inches="tight" pad the right and look off-center
 fig.legend(handles=h,fontsize=11,loc="lower center",bbox_to_anchor=(0.5,-0.01),

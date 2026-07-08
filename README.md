@@ -38,7 +38,9 @@ the paper).
   `*_curated.json`, `*_safewash.json` -- cached judge scores (curated probe + AgentDojo only).
 - `actions.json` -- the novel curated probe (our own data). `_bench_texts.json`,
   `_inj_goals.json`, `_bench_safewash_texts.json` -- AgentDojo-derived task/goal texts.
-- `loop_allsuites.json` -- closed-loop results across all four AgentDojo suites.
+- `loop_allsuites.json` -- closed-loop results across all four AgentDojo suites (backs
+  Table `tab:loop`); `loop_gemma9b.json` -- the 9B good-judge sweep (App. B.5).
+- `analyze_gemma.py` -- reproduces the 9B good-judge numbers from `loop_gemma9b.json`.
 - `*_score.py`, `judge.py`, `cerebras_judge.py`, `samba70b_attack.py`, `run_loop.py` -- the
   scorers / attack / closed-loop harness that *produced* the caches (read API keys from env).
 
@@ -55,7 +57,8 @@ Individual pieces:
 python agentdojo_paired.py                 # paired AUC vs 9B + TOST (no judge beats the 9B)
 python agentdojo_ci.py                      # per-judge AUC + bootstrap CIs
 python run_synthetic.py                     # C1 certificate + C2 frontier vs analytic truth
-python analyze_loop.py loop_allsuites.json  # closed-loop Cochran-Mantel-Haenszel analysis
+python analyze_loop.py loop_allsuites.json  # closed-loop CMH table (tab:loop)
+python analyze_gemma.py                     # 9B good-judge sweep (App. B.5)
 ```
 
 ## Environment for optional re-scoring

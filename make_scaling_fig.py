@@ -88,11 +88,11 @@ from matplotlib.lines import Line2D
 h=[Line2D([0],[0],marker=FAM_M[f],color="w",markerfacecolor=FAM_C[f],markeredgecolor="k",markersize=9,label=f) for f in FAM_C]
 h+=[Line2D([0],[0],marker="o",color="w",markerfacecolor="gray",markeredgecolor="k",markersize=9,alpha=1.0,label="curated"),
     Line2D([0],[0],marker="o",color="w",markerfacecolor="gray",markeredgecolor="k",markersize=9,alpha=0.45,label="AgentDojo")]
-# legend to the RIGHT of the figure (outside the axes) so it never overlaps points
-axR.legend(handles=h,fontsize=11,loc="center left",bbox_to_anchor=(1.02,0.5),ncol=1,
-           framealpha=0.9,borderaxespad=0.)
-# extra horizontal space between the two panels; leave room on the right for the legend
-fig.subplots_adjust(left=0.06,right=0.83,bottom=0.17,top=0.90,wspace=0.30)
+# single shared legend BELOW both panels (centered) so the figure is horizontally
+# symmetric; a right-side legend made bbox_inches="tight" pad the right and look off-center
+fig.legend(handles=h,fontsize=11,loc="lower center",bbox_to_anchor=(0.5,-0.01),
+           ncol=len(h),framealpha=0.9,frameon=False)
+fig.subplots_adjust(left=0.06,right=0.98,bottom=0.30,top=0.90,wspace=0.28)
 fig.savefig(os.path.join(FIG,"scaling.pdf"),bbox_inches="tight"); plt.close()
 print("wrote figures/scaling.pdf")
 

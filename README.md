@@ -41,8 +41,15 @@ the paper).
 - `loop_allsuites.json` -- closed-loop results across all four AgentDojo suites (backs
   Table `tab:loop`); `loop_gemma9b.json` -- the 9B good-judge sweep (App. B.5).
 - `analyze_gemma.py` -- reproduces the 9B good-judge numbers from `loop_gemma9b.json`.
-- `*_score.py`, `judge.py`, `cerebras_judge.py`, `samba70b_attack.py`, `run_loop.py` -- the
-  scorers / attack / closed-loop harness that *produced* the caches (read API keys from env).
+- `frontier_analyze.py` -- the current closed frontier (Claude Opus 4.5, Claude Sonnet 4.5,
+  Amazon Nova Pro, Mistral Large 3): reproduces the AgentDojo ceiling (paired AUC vs. the 9B),
+  the safe-washing collapse (per-judge `eta`), and the seven-vendor label-ambiguity panel,
+  all from cached scores. `run_adv_frontier_adaptive.py` -- the best-of-N *optimizing*
+  safe-washing attack that collapses Claude Opus 4.5 (`eta=0.28`) where a single rewrite does
+  not. Cached scores: `frontier_*_bench.json`, `frontier_adaptive_*.json`; `frontier_score.py`
+  is the scorer that produced them.
+- `*_score.py`, `judge.py`, `run_loop.py` -- the scorers / attack / closed-loop harness that
+  *produced* the caches (each reads its model id and API key from environment variables).
 
 ## Reproduce the headline results (no inference)
 
@@ -59,15 +66,18 @@ python agentdojo_ci.py                      # per-judge AUC + bootstrap CIs
 python run_synthetic.py                     # C1 certificate + C2 frontier vs analytic truth
 python analyze_loop.py loop_allsuites.json  # closed-loop CMH table (tab:loop)
 python analyze_gemma.py                     # 9B good-judge sweep (App. B.5)
+python frontier_analyze.py                  # closed-frontier ceiling + collapse + panel (App. B.6)
 ```
 
 ## Environment for optional re-scoring
 
-Scorers read keys from environment variables (e.g. `JUDGE_API_KEY`, `AZURE_API_KEY`,
-`AZURE_URL`, `AZURE_DEPLOYMENT`); local open judges are served via an OpenAI-compatible
-endpoint (`OLLAMA_URL`). AgentDojo is pinned to `v1.2.1`; InjecAgent and AgentHarm must be
-obtained from their original (access-gated) sources under their own terms and are not
-included here.
+Every scorer reads its credentials from environment variables; no keys are stored in the
+repository. The frontier scorer uses `JUDGE_API_KEY`, `JUDGE_MODEL` (the hosted model id),
+and optionally `JUDGE_REGION` / `JUDGE_ENDPOINT`; local open judges are served through an
+OpenAI-compatible endpoint (`OLLAMA_URL`). Re-scoring is entirely optional -- every reported
+table and figure regenerates from the cached scores with no inference. AgentDojo is pinned to
+`v1.2.1`; InjecAgent and AgentHarm must be obtained from their original (access-gated) sources
+under their own terms and are not included here.
 
 ## License
 

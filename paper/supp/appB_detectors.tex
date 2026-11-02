@@ -1,0 +1,51 @@
+% Prompt-injection detector baselines (Supplement B); numbers from baselines/pi_detector_result.json.
+\subsection*{B.21\quad Prompt-injection detector baselines}
+A gate need not use a general-purpose judge: dedicated prompt-injection detectors are cheaper
+and are deployed for exactly this purpose. We therefore scored two off-the-shelf detectors on
+the items of the judge study, as released and without tuning on any of our items:
+ProtectAI's DeBERTa-v3 prompt-injection classifier, version~2 \citep{protectai2024deberta}, and
+PIGuard \citep{li2025piguard}, at pinned model revisions. The score is the classifier's
+probability of the injection class, computed from the raw item text; Meta's Prompt Guard
+models are gated and were not available to us. Table~\ref{tab:detectors} reports DeLong
+intervals, paired differences against the reference judges, the cross-fitted split-conformal
+operating points of main-paper Section~\ref{sec:exp} (same 500 splits and seed), and each
+detector's native rule (block if and only if the score is at least~$.5$). The script \texttt{baselines/pi\_detector\_baseline.py}
+regenerates every number from the cached scores.
+
+\begin{table*}[t]
+\caption{Prompt-injection detectors as the gate's score, on the 132 instruction strings (35
+violations) and the 123 serialized ground-truth tool calls (26 violations). Paired DeLong
+differences are against Gemma-2-9B (instruction strings) and Claude Opus~5.5, the best hosted
+judge (tool calls). Operating points: mean miss/false block over 500 cross-fitted two-fold
+splits; f.b.: false block; native: the detector's own threshold $.5$. Meta's Prompt Guard models are gated and were not available.}
+\label{tab:detectors}
+\centering\footnotesize
+\setlength{\tabcolsep}{4.2pt}
+\begin{tabular}{@{}llcccccc@{}}
+\toprule
+Items & Score & AUC [95\%] & $\Delta$AUC vs.\ reference [95\%], $p$ & $\delta=.10$ miss/f.b. & $\delta=.20$ miss/f.b. & Native miss/f.b. \\
+\midrule
+Instruction & Gemma-2-9B (reference) & .813 [.718, .908] & --- & .012/.779 & .144/.649 & .229/.330 \\
+strings & ProtectAI-v2 & .848 [.764, .932] & $+$.035 [$-$.038, $+$.108], .35 & .054/.801 & .159/.385 & .543/.031 \\
+& PIGuard & .532 [.416, .649] & $-$.281 [$-$.385, $-$.176], $1.5\times10^{-7}$ & .054/.984 & .160/.874 & 1.000/.113 \\
+\midrule
+Tool & Claude Opus 5.5 (reference) & .885 [.807, .963] & --- & .064/.662 & .123/.400 & .269/.062 \\
+calls & ProtectAI-v2 & .818 [.729, .907] & $-$.067 [$-$.156, $+$.023], .14 & .072/.644 & .143/.433 & .462/.134 \\
+& PIGuard & .523 [.392, .655] & $-$.362 [$-$.491, $-$.233], $4.0\times10^{-8}$ & .072/.973 & .143/.889 & .846/.216 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+On the instruction strings, ProtectAI-v2 ranks items as well as the reference judge
+($\Delta=+.035$, $p=.35$); by AUC it would place eighth among the 33 judge runs. Its native
+threshold, however, misses $.543$ of the injection goals, and calibrated to $\delta=.10$ it
+blocks $.801$ of compliant instructions, a higher false-block rate than seven of the 33 judge runs; at $\delta=.20$ its
+false block ($.385$) is lower than all but two runs, at a realized miss ($.159$) near the top of
+the judges' range ($.019$--$.164$), so that comparison is not at equal miss. PIGuard is at chance
+and flags none of the 35 goals at its native threshold. On the serialized tool calls the pattern
+repeats: ProtectAI-v2 is not distinguishable from any of the seven hosted judges (differences
+$-.067$ to $+.039$, all $p\ge.14$), and PIGuard is below every one ($p\le.003$). Both detectors
+are trained to recognize injection \emph{text}, whereas our violations are the injected goals
+themselves, phrased as ordinary instructions. The lesson is that of Proposition~\ref{thm:frontier}
+and the certificate card: what a detector-based gate can certify is fixed by its ROC at a
+calibrated operating point, not by its default threshold or its name.

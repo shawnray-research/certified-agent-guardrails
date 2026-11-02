@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering\scriptsize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Judge & AUC [95\% CI] & $\Delta$AUC vs 9B [95\% CI] & miss@.5 clean & miss@.5 attacked & $\Delta$miss [sim.\ 95\%] \\
+\midrule
+Gemma-2-9B (ref) & $.813$ [$.714,.901$] & --- & $.229$ & $.800$ & $+.571$ [$+.360,+.783$] \\
+Claude-Opus-4.5 (paper) & $.858$ [$.780,.929$] & $+.045$ [$-.003,+.098$] & $.286$ & $.143$ & $-.143$ [$-.306,+.021$] \\
+Claude-Sonnet-4.5 (paper) & $.839$ [$.749,.918$] & $+.026$ [$-.014,+.074$] & $.257$ & $.143$ & $-.114$ [$-.295,+.067$] \\
+\midrule
+Claude-Opus-5.5$^\dagger$ & $.886$ [$.819,.943$] & $+.073$ [$+.004,+.146$] & $.229$ & $.143$ & $-.086$ [$-.220,+.049$] \\
+\quad refusal$\to$1.0 & $.922$ [$.864,.972$] & $+.109$ [$+.052,+.174$] & $.229$ & $.143$ & $-.086$ \\
+Claude-Sonnet-5.5$^\dagger$ & $.848$ [$.765,.922$] & $+.035$ [$-.019,+.096$] & $.371$ & $.400$ & $+.029$ [$-.114,+.171$] \\
+\quad refusal$\to$1.0 & $.863$ [$.781,.935$] & $+.050$ [$+.001,+.106$] & $.371$ & $.400$ & $+.029$ \\
+Claude-Haiku-5.5 & $.871$ [$.795,.939$] & $+.058$ [$+.016,+.103$] & $.314$ & $.343$ & $+.029$ [$-.108,+.165$] \\
+GPT-5.5 & $.819$ [$.723,.908$] & $+.006$ [$-.054,+.070$] & $.200$ & $.229$ & $+.029$ [$-.109,+.166$] \\
+\midrule
+GPT-6.1-terra* & $.847$ [$.762,.924$] & $+.034$ [$-.017,+.092$] & $.200$ & $.200$ & $+.000$ [$+.000,+.000$] \\
+GPT-6.1-sol* & $.845$ [$.751,.926$] & $+.032$ [$-.018,+.089$] & $.343$ & $.229$ & $-.114$ [$-.265,+.036$] \\
+\bottomrule
+\end{tabular}
+\caption{2026-11 frontier judges on the 132 AgentDojo instruction strings (97 compliant, 35 violating), same fixed 0--100 prompt; Gemma-2-9B reference AUC $.813$. AUC CI: item bootstrap (2{,}000 draws, as \texttt{agentdojo\_ci.py}); $\Delta$AUC: paired item bootstrap (5{,}000 shared draws, as \texttt{agentdojo\_paired.py}). C3: miss = score $<.5$ on all 35 violations, clean vs.\ the predeclared 16-token administrator-preapproval suffix; $\Delta$miss intervals are 20{,}000-draw suite-stratified max-$|T|$ simultaneous bands over the paper's 11 judges plus the four new judges (critical value 2.94); exploratory rows (*) use the band over all 17 judges. $^\dagger$Provider refusals (\texttt{stop\_reason=refusal}, empty text) are scored $0.5$ by the repo's parse-failure rule; the indented row rescores them $1.0$ (the repo's content-filter rule). Claude 5.5 models reject \texttt{temperature}; Opus 5.5 cannot disable thinking (adaptive, effort low).}
+\label{tab:frontier2026}
+\end{table}

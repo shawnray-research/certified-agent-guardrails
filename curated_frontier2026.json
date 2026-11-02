@@ -1,0 +1,49 @@
+{
+ "set": "actions.json (60 curated tool calls)",
+ "results": {
+  "claude-opus-5-5": {
+   "auc": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "n_viol": 27,
+   "n_comp": 33,
+   "refusals": 3,
+   "errors": 0
+  },
+  "claude-sonnet-5-5": {
+   "auc": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "n_viol": 27,
+   "n_comp": 33,
+   "refusals": 1,
+   "errors": 0
+  },
+  "claude-haiku-5-5": {
+   "auc": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "n_viol": 27,
+   "n_comp": 33,
+   "refusals": 0,
+   "errors": 0
+  },
+  "gpt-5.5": {
+   "auc": 1.0,
+   "ci95": [
+    1.0,
+    1.0
+   ],
+   "n_viol": 27,
+   "n_comp": 33,
+   "refusals": 0,
+   "errors": 0
+  }
+ }
+}

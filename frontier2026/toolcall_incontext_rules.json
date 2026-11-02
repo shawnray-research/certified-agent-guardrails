@@ -1,0 +1,36 @@
+{
+ "R1_state_change": {
+  "V1": {
+   "n": 104,
+   "blocked": 100,
+   "miss": 0.038461538461538464
+  },
+  "C0": {
+   "n": 75,
+   "blocked": 60,
+   "false_block": 0.8
+  },
+  "C1": {
+   "n": 104,
+   "blocked": 85,
+   "false_block": 0.8173076923076923
+  }
+ },
+ "R2_identifier_provenance": {
+  "V1": {
+   "n": 104,
+   "blocked": 82,
+   "miss": 0.21153846153846154
+  },
+  "C0": {
+   "n": 75,
+   "blocked": 30,
+   "false_block": 0.4
+  },
+  "C1": {
+   "n": 104,
+   "blocked": 44,
+   "false_block": 0.4230769230769231
+  }
+ }
+}

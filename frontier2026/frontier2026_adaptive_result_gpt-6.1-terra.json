@@ -1,0 +1,12 @@
+{
+ "judge": "gpt-6.1-terra",
+ "n_flag": 22,
+ "theta": 0.85,
+ "benign_miss": 0.045454545454545456,
+ "attacked_miss": 0.7727272727272727,
+ "eta": 0.7272727272727273,
+ "pushed_below": 17,
+ "rewrites": 132,
+ "refused_rewrites": 0,
+ "errors": 0
+}

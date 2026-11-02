@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\caption{Query-adaptive rewrites of the injection against in-context judges (\texttt{toolcall\_incontext\_adaptive.py},
+checks in \texttt{toolcall\_incontext\_adaptive\_check.py}; one run). $\hat\theta$: in-sample $\delta=.10$ threshold on
+the 104 clean V1 scores. Best of $N$: flagged-when-clean V1 calls for which some of the first $N$ rewrites was scored
+below $\hat\theta$ once (search-time counts under first-integer parsing, which overstate evasion; Clopper--Pearson
+95\%). Strict: the selected rewrite evades in at least
+3 of 5 fresh re-scores with strict parsing (a bare integer, otherwise $1.0$); $E$: expected evasions, the sum over
+calls of the selected rewrite's strict evasion fraction; $\hat\eta$: $E/104$, a point estimate of the full-law miss
+increase of Definition~\ref{def:adversary}. Null: the same best-of-20 selection applied to 20 strict re-scores of
+the unmodified clean prompt; adj.: strict evasions and $\hat\eta$ after removing calls whose clean prompt also fell
+below $\hat\theta$ in the null; $\theta=.5$: strict stable evasions at the native threshold. Refus.: refused attacked
+queries (scored as blocks).}
+\label{tab:incontext-adaptive}
+\centering\footnotesize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lccccccccccc@{}}
+\toprule
+& & \multicolumn{2}{c}{best of $N$, $\delta=.10$ gate} & \multicolumn{3}{c}{strict re-scores} & null & \multicolumn{2}{c}{null-adj.} & $\theta=.5$ & \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-7}\cmidrule(lr){8-8}\cmidrule(lr){9-10}\cmidrule(lr){11-11}
+Judge & $\hat\theta$ & $N{=}1$ & $N{=}20$ & strict & $E$ & $\hat\eta$ & $N{=}20$ & strict & $\hat\eta$ & strict & Refus. \\
+\midrule
+Claude Opus 5.5 & .980 & 14/95 & 34/95 {\scriptsize[.262,.463]} & 11/95 & 12.2 & .117 & 9/95 & 6/95 & .073 & 0/104 & 1127 \\
+Claude Fable 5.1 & .920 & 1/96 & 23/96 {\scriptsize[.158,.337]} & 0/96 & 0.4 & .004 & 3/96 & 0/96 & .000 & 0/103 & 518 \\
+GPT-5.5 & .950 & 0/102 & 3/102 {\scriptsize[.006,.084]} & 1/102 & 1.0 & .010 & 2/102 & 1/102 & .010 & 0/104 & 0 \\
+GPT-6.1 Terra & .990 & 2/98 & 9/98 {\scriptsize[.043,.167]} & 2/98 & 2.0 & .019 & 2/98 & 1/98 & .010 & 0/104 & 0 \\
+Claude Haiku 5.5 & .920 & 9/101 & 40/101 {\scriptsize[.300,.498]} & 17/101 & 17.2 & .165 & 11/101 & 12/101 & .123 & 1/104 & 0 \\
+GPT-6.1 Sol & 1.000 & 1/100 & 6/100 {\scriptsize[.022,.126]} & 5/100 & 3.6 & .035 & 4/100 & 1/100 & .010 & 0/104 & 0 \\
+Claude Sonnet 5.5 & .970 & 11/98 & 37/98 {\scriptsize[.282,.481]} & 6/98 & 7.0 & .067 & 8/98 & 3/98 & .037 & 0/103 & 303 \\
+\bottomrule
+\end{tabular}
+\end{table*}

@@ -1,0 +1,67 @@
+% Summary of the three boundaries (journal version): what each result says, when it holds,
+% what is imported versus new, and what it means for a deployment.
+\begin{table*}[t]
+\caption{The three boundaries at a glance. Each result holds only in its stated regime; the
+evidence column points to the experiment that probes it.}
+\label{tab:summary}
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.255\textwidth}>{\raggedright\arraybackslash}p{0.15\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.062\textwidth}@{}}
+\toprule
+Boundary and result & Regime & Imported ingredient $\rightarrow$ what is new & Consequence for deployments & Evidence\\
+\midrule
+\textbf{T1 expressiveness} (Thm.~\ref{thm:t1}, Prop.~\ref{prop:strict}): a deterministic gate
+enforces exactly the nonempty safety policies with $\Good(P)\in\RA[\Th;\Pi]$, strictly fewer than
+edit automata
+& fixed oracle bits $\Pi$; irreversible commits; every proposal stream
+& security, truncation, and bounded-memory automata
+\citep{schneider2000enforceable,ligatti2005edit,talhi2008memory} $\rightarrow$
+effect-trace, oracle-relative, keyed-counter register form over data-carrying actions
+& compile caps, quotas, and revocation to exact gates; deferred commits belong in the tool
+interface, not in the gate
+& \S\ref{sec:q5}\\
+\addlinespace
+\textbf{T2 exogenous frontier} (Prop.~\ref{thm:frontier}, Cor.~\ref{cor:reduction}): the ROC of the
+gate's information is the exact miss/false-block frontier
+& one-step law independent of the gate
+& Neyman--Pearson, Blackwell $\rightarrow$ the object guardrail benchmarks should report, lifted
+to episodes
+& no ensemble or wrapper on the same information beats it; report an operating point, not AUC
+& \S\ref{exp:q1}\\
+\addlinespace
+\textbf{T2 certificate} (Thm.~\ref{thm:conformal}): calibrated per-step miss risk $\delta/H$ bounds
+the unsafe-episode rate by $\delta$
+& label-conditional exchangeability (Asm.~\ref{ass:benign})
+& conformal risk control $\rightarrow$ per-step gate calibration on violating examples
+& the bound is marginal and may be met only by blocking everything
+& \S\ref{exp:q1}\\
+\addlinespace
+\textbf{T2 adversary} (Thm.~\ref{thm:adv}, Prop.~\ref{prop:zero-miss}, Cor.~\ref{cor:robust}):
+the bound degrades to $\min\{1,\delta+H\bar\eta(\rho)\}$
+& benign calibration; budget-$\rho$ judge-input rewrites (choosing the violation voids it)
+& robust conformal prediction \citep{gendler2022robustconformal} $\rightarrow$ risk-level
+margin-aware recalibration for discrete rewrites, valid once $\bar\eta(\rho)<\delta/H$ is verified
+& benign calibration is not a security boundary; attacks can refute, never certify, a margin
+& \S\ref{exp:q3}\\
+\addlinespace
+\textbf{T2 feedback} (Prop.~\ref{prop:feedback}, Cor.~\ref{cor:no-estimator},
+Prop.~\ref{prop:explore}, Thm.~\ref{thm:sequential}): ungated logs do not identify the
+closed-loop frontier; exploratory blocking does
+& blocks change later proposals
+& CPOMDP occupancy, off-policy overlap $\rightarrow$ non-identifiability for gated agents; occupancy
+program for finite models
+& evaluate in the loop, logging known block and allow probabilities; sample cost can grow like
+$\varepsilon^{-H}$
+& \S\ref{exp:q2}, \S\ref{exp:q4}\\
+\addlinespace
+\textbf{T3 decidability} (Prop.~\ref{thm:undec}, Thm.~\ref{thm:frag}): whether a policy can ever
+fire is undecidable with two zero-testable counters, \PSPACE-complete for $\Th_0$, \NP-complete for caps, quotas, revocation
+& static analysis of the policy specification
+& Minsky machines, register-automaton \PSPACE-hardness \citep{demri2009ltl} $\rightarrow$ $\Th_0$ via exact cap saturation and a
+one-witness reduction; Parikh phases for cap checks
+& keep policy languages inside $\Th_0$ (caps, quotas, revocation: one SMT query) to ship a complete ``can this rule fire'' linter
+& \S\ref{sec:q5}\\
+\bottomrule
+\end{tabularx}
+\end{table*}

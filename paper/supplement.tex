@@ -1,0 +1,36 @@
+%% Supplementary material for the IEEE TDSC submission: complete proofs, extended experiments,
+%% and reproducibility details (IEEE CS journals treat all appendices as supplemental material).
+\documentclass[10pt,journal,compsoc]{IEEEtran}
+\input{preamble}
+\usepackage{xr}
+\externaldocument[][nocite]{main}% import labels only, not citations
+\newcommand{\artifactURL}{\url{https://github.com/shawnray-research/certified-agent-guardrails/tree/tdsc}}
+\hypersetup{pdftitle={Supplementary Material: What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents},pdfauthor={Shawn Ray}}
+\begin{document}
+\bstctlcite{IEEEexample:BSTcontrol}
+\title{Supplementary Material for ``What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents''}
+\author{Shawn~Ray}
+\markboth{IEEE Transactions on Dependable and Secure Computing (supplementary material)}%
+{Ray: What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents}
+\maketitle
+\renewcommand{\appendixname}{Supplement}\appendices
+% Supplement floats, lemmas, remarks, and propositions are numbered S1, S2, ... so they never collide with
+% main-paper numbers; restated main results keep their main numbers via xr.
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thelemma}{S\arabic{lemma}}
+\renewcommand{\theremark}{S\arabic{remark}}
+\renewcommand{\theproposition}{S\arabic{proposition}}
+% Distinct hyperref anchors, so links imported from main via xr never land on supplement objects.
+\def\theHtable{S\arabic{table}}\def\theHfigure{S\arabic{figure}}\def\theHlemma{S\arabic{lemma}}%
+\def\theHremark{S\arabic{remark}}\def\theHproposition{S\arabic{proposition}}
+\input{supp/appA_proofs}
+\input{supp/appB_experiments}
+\input{supp/appB_detectors}
+\input{supp/appC_repro}
+\input{supp/appD_related}
+\input{supp/appE_evaluation}
+\input{supp/appE_pair}
+\bibliographystyle{IEEEtranN}
+\bibliography{refs}
+\end{document}

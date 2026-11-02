@@ -1,0 +1,73 @@
+\section{\texorpdfstring{T1: The Expressiveness Boundary\\(Oracle Enforceability)}{T1: The Expressiveness Boundary (Oracle Enforceability)}}\label{sec:t1}
+
+Call $g$ a \emph{$(\Th;\Pi)$-gate} if it runs a deterministic keyed-counter register automaton
+(Def.~\ref{def:safety}) with $\Th$-guards and queries to the fixed predicate bits $\Pi$ once, online
+and in commit order, over the committed \emph{effect} history, and decides each proposal by the one
+transition it takes from the configuration reached, labeled $\allow$, $\block$, or $\subst(t)$ for a
+term $t$ over the proposal's fields, the registers, and constants;
+Remark~\ref{rem:general-gates} treats general computable gates.
+
+\begin{theorem}[Oracle characterization; classical \citep{ligatti2005edit,ligatti2009nonsafety}, instantiated]\label{thm:t1}
+Fix any oracle interface $\Pi$ (Def.~\ref{def:judge}; with action-local $\Pi$ the bits cannot replace the automaton's memory, Proposition~\ref{prop:strict}(ii)) and a nonempty policy $P$. Then $P$ is precisely enforceable
+by a deterministic $(\Th;\Pi)$-gate if and only if it is safety and
+$\Good(P)\in\RA[\Th;\Pi]$. Enforcement is witnessed by simulating that recognizer
+and refusing exactly the one-step extensions it rejects; each step evaluates one
+enabled transition in the given guard theory.
+\end{theorem}
+
+\noindent\emph{Proof idea.} ($\Leftarrow$) Simulate the recognizer on the committed history and
+block exactly the extensions it rejects. ($\Rightarrow$) If $P$ is not safety, some violating
+$x$ is a limit point of $P$; transparency on its compliant extensions forces the deterministic
+gate to allow every step of $x$, contradicting soundness. Simulating the gate on finite words
+yields a recognizer of $\Good(P)$ (Supplement~A.2).
+
+\paragraph{Running example}
+P3 needs one control flag set by $\mathsf{revoke}$, and P2 one monotone counter per
+key $(k,w)$ with guard $\mathit{spent}_{k,w}+v\le c$, so a gate enforces both
+without semantic predicates and never blocks a compliant send or transfer. P1's
+guard, ``the body contains PII,'' is semantic: a gate enforces P1 only if that
+predicate is in $\Pi$; with a fallible judge in its place, T2 governs.
+
+\begin{remark}[General gates]\label{rem:general-gates}
+An arbitrary computable gate with the same oracle interface enforces a nonempty $P$ if and only
+if $P$ is safety with good-prefix membership decidable relative to $\Pi$: the
+truncation-automaton characterization of \citet{ligatti2005edit,ligatti2009nonsafety} (already over countably infinite action sets), with blocking in place of
+halting and with oracle-relative decidability. $(\Th;\Pi)$-gates
+are its register-recognizable fragment.
+\end{remark}
+
+\begin{proposition}[A strict hierarchy]\label{prop:strict}
+Give every enforcer the same oracle bits $\Pi$.
+(i)~Gates, which enforce precisely, enforce strictly fewer policies than edit automata under effective
+enforcement \citep{ligatti2005edit} (an $\omega$-policy counts as edit-enforceable when some extension of it to
+finite executions is, Supplement~A.2); the gap is exactly buffering, which irreversibility removes. Witness: ``every $\mathsf{pay}$ is eventually followed by a
+$\mathsf{confirm}$'' is a renewal property an edit automaton enforces by buffering
+$\mathsf{pay}$, but transparency on the compliant streams $\mathsf{pay}^{k}\mathsf{confirm}^{\omega}$
+forces a gate to allow every irreversible $\mathsf{pay}$, so on $\mathsf{pay}^{\omega}$ it
+commits a violation no later decision can retract.
+(ii)~If $\Pi$ is action-local and recipients range over an infinite equality-only data sort, then no
+$(\Th;\Pi)$-gate without key maps (whatever its registers, global counters, and counter guards and
+updates) enforces the per-recipient cap of one, which a $(\Th_0;\Pi)$-gate enforces with one key-local
+flag. Witness: after $r{+}1$ allowed sends to distinct recipients that avoid the gate's constants and
+share oracle bits, some recipient $d$ is in none of the gate's $r$ registers, and a fresh such recipient
+$e$ satisfies exactly the same guards, although a second send to $d$ is a violation and a send to $e$ is
+not.
+\end{proposition}
+
+Part~(i) is the classical truncation/edit separation \citep{ligatti2005edit,ligatti2009nonsafety},
+restated to locate gates, and holds for every $\Pi$; part~(ii) is where the restriction on $\Pi$ matters,
+since with the history bit $\mathbf{1}[\tau\cdot a\in\Good(P)]$ a register-free gate enforces the cap
+(\S\ref{sec:model}). The witness of part~(i) is a common design: a deferred-commit payment protocol
+needs buffering, so the deferral must live in the tool interface, not in the gate. Over finite
+alphabets, enforcers for reactive systems must release an output at every reaction, so not every safety property
+is enforceable there \citep{pinisetty2017synchronous,anand2025prompt}; our gate can always commit
+the no-op. Over data, determinism is a genuine restriction \citep{aceto2025monitorability}, and
+relational policies are hyperproperties outside this class
+\citep{clarkson2010hyperproperties,pandey2026local}.
+
+Substitution ($\subst(a')$) leaves the class unchanged, and so does escalation if the escalation
+oracle is part of $\Pi$: the limit-point argument and the never-alter recognizer apply verbatim. With an oracle, a transparent gate never alters a compliant proposal,
+so substitution cannot improve $U$; with a judge, committing a \emph{prefix-safe} rewrite ($ua'$
+good whenever $u$ is) instead of blocking lowers the graded false-block loss to at most
+$\ell_{\rm sub}\alpha(\theta)$ at unchanged miss, where $\ell_{\rm sub}\in[0,1]$ is a rewrite's loss relative to a block's unit loss. Escalation fits only as an oracle that returns
+prefix-safe actions (Supplement~A.2).

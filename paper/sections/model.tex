@@ -1,0 +1,115 @@
+\section{The Enforcement Model}\label{sec:model}
+
+We formalize the objects of \S\ref{sec:threat}; Supplement~A.1 collects the notation.
+
+\begin{definition}[Actions, data, traces]\label{def:actions}
+Fix finite action types $\Sigma$ with arities $\mathrm{ar}:\Sigma\to\mathbb{N}$
+and a data domain $\D$ (possibly infinite and many-sorted, e.g., an equality sort plus an $\mathbb{N}$
+amount sort; with equality, optionally a linear
+order). An \emph{action} is $a=(\sigma,\bar d)$ with $\bar
+d\in\D^{\mathrm{ar}(\sigma)}$. The alphabet
+$\A=\bigcup_{\sigma}\{\sigma\}\times\D^{\mathrm{ar}(\sigma)}$ is infinite when
+$\D$ is and some arity is positive. Traces are words in $\Astar$ (finite) or $\Aomega$ (infinite); $\preceq$
+is the prefix order. A distinguished \emph{no-op} $\noop\in\A$ has no external
+effect, and the \emph{external-effect projection}
+$\erase:\A^{\infty}\to(\A\setminus\{\noop\})^{\infty}$ deletes every $\noop$.
+We score a committed trace $c$ on its \emph{effect} trace: $c$ is \emph{safe} for $P$
+iff (i) no finite prefix of $\erase(c)$ is a bad prefix of $P$ and (ii)
+$\erase(c)\in P$ whenever $\erase(c)$ is infinite. For safety $P$
+(Def.~\ref{def:safety}), (ii) follows from (i) (Supplement~A.1), so only bad prefixes
+matter, and committing $\noop$ (blocking) is a safe default that never adds one.
+\end{definition}
+The no-op abstracts external effects only: T1 ignores a block's latency, retries,
+and memory side effects; when these change later proposals, T2 models them
+(Def.~\ref{def:controlled}).
+
+\begin{definition}[Safety, register representation]\label{def:safety}
+A policy is a set $P\subseteq(\A\setminus\{\noop\})^{\omega}$ of infinite \emph{effect} traces (for policies, $\Astar$ and $\Aomega$ below range over the effect alphabet $\A\setminus\{\noop\}$). $P$ is \emph{safety}
+\citep{alpern1987recognizing} iff every $x\notin P$ has a finite bad prefix:
+$\exists n\,\forall y:\ x_{\le n}y\notin P$. Let $\Bad(P)\subseteq\Astar$ be the
+minimal bad prefixes and $\Good(P)=\Astar\setminus\Bad(P)\A^{*}$ the
+(prefix-closed) good prefixes. Our policy-automaton model is a
+\emph{keyed-counter register automaton} (a custom class): it extends the register
+automaton of \citet{kaminski1994finite} with \emph{finite-support key maps}. Concretely it has
+finite control, finitely many data registers over $\D$ (their number is part of the specification; distinct registers may hold equal data), finitely many finite-support key
+maps, each sending a key (a tuple of data values named by a designated field of the current
+action) to a per-key finite local state and a vector of per-key counters over $\mathbb N$
+(unattached keys default to the initial local state and $0$; a transition reads and updates only
+the entries of the keys the current action names), and,
+when declared, one fixed finite vector of global $\mathbb N$-counters. Numeric
+counters are distinct from data registers; transitions choose their successor and updates by $\Th$-guards on the current
+action's data, the registers, and the counters, with absorbing bad states. Counter values
+are unbounded in general; the guard theory $\Th$, including its allowed counter updates, sets expressivity (the
+separable, key-local, constant-guard monotone fragment $\Th_0$ is decidable;
+$\Th^\ast$ with two decrementable zero-test counters is undecidable;
+\S\ref{sec:t3}). At any finite time
+only finitely many keys are active, so the recognizer stays deterministic and finitely
+represented. $\RA[\Th]$ is the class of finite-word languages such an
+automaton recognizes; $P$ is \emph{$\Th$-representable safety} if it is safety and
+$\Good(P)\in\RA[\Th]$. When guards may query a fixed finite vector of externally supplied
+predicate bits $\Pi$, we write $\RA[\Th;\Pi]$ and say \emph{representable relative
+to $\Pi$}; this interface does not grant access to any other semantic fact.
+\end{definition}
+For P2 of Example~\ref{ex:running}, a trusted clock adapter tags each transfer
+to recipient $k$ of amount $v$ with a day bucket $w$, written
+$\mathsf{transfer}(k,v,w)$; the automaton keeps one monotone counter per key
+$(k,w)$ and tests $\mathit{spent}_{k,w}+v\le c$. The class is not tuned to the theorem: over an infinite recipient sort
+with equality only, registers and global counters without key maps cannot even express a per-recipient
+cap of one, for any action-local $\Pi$ (Proposition~\ref{prop:strict}(ii);
+cf.~\citep{kaminski1994finite}); unrestricted counters are
+undecidable (\S\ref{sec:t3}); and monotone per-key counters match deployed caps, quotas, and
+rate limits. We take
+specification automata to be trim (every reachable non-bad configuration has some
+non-bad successor under an effect action, e.g., an always-allowed read), so that the language of words
+that avoid the bad states is exactly $\Good(P)$ and ``block iff the next state is
+bad'' is the T1 gate. Trimness is a hypothesis on the specification, not something the gate checks:
+an always-allowed action guarantees it, but for $\Th^\ast$ it is undecidable in general (by a
+variant of the reduction behind Proposition~\ref{thm:undec}).
+
+\begin{definition}[Predicates, judge, error rates]\label{def:judge}
+Guards are boolean combinations of $\Th$-constraints on data and semantic
+predicates $\pi_i:(\A\setminus\{\noop\})^{*}\times\A\to\{0,1\}$ evaluated on
+the committed effect history $\tau\in(\A\setminus\{\noop\})^{*}$ (ground truth). A \emph{judge}
+$\hat\pi_i^{\theta}(\tau,a)=\mathbf{1}[s_i(\tau,a)\ge\theta_i]$ approximates
+$\pi_i$ via a score $s_i$; under a distribution $\Pdist$ on $(\tau,a)$ its
+false-alarm and miss rates are
+$\alpha_i(\theta_i)=\Pdist[\hat\pi_i=1\mid\pi_i=0]$ and
+$\beta_i(\theta_i)=\Pdist[\hat\pi_i=0\mid\pi_i=1]$. The \emph{oracle} case is
+$\hat\pi_i=\pi_i$ on every $(\tau,a)$ (not merely $\alpha_i=\beta_i=0$ under one $\Pdist$) for the fixed available vector
+$\Pi=(\pi_1,\ldots,\pi_m)$; $\Pi$ is \emph{action-local} if each $\pi_i(\tau,a)$ depends on $a$ alone
+(including trusted metadata carried as data on $a$). The \emph{ROC frontier} $\ROC(\beta)$, a nonincreasing convex function of $\beta$, is the least
+false-alarm rate attainable at miss rate $\beta$ by any randomized decision measurable with
+respect to $s_i$ (traced by likelihood-ratio tests on $s_i$, and by thresholds when $s_i$ is monotone in
+the likelihood ratio).
+\end{definition}
+
+Formal agent policies with fallible predicates, such as a PII detector inside a
+Datalog policy, also appear in \citet{palumbo2026formal} and
+\citet{solkobreslin2026efficient}; we separate the oracle and judge regimes so
+that each gets an exact boundary. A history-dependent bit such as
+$\mathbf{1}[\tau\cdot a\in\Good(P)]$ would make every safety policy representable, so our
+instantiations use action-local $\Pi$ (``this body contains PII'') and carry history-dependent
+facts such as provenance as data on actions.
+
+
+\begin{definition}[Gate, soundness, transparency, utility]\label{def:gate}
+Taking $\D$ countable and effectively presented and scores finitely represented
+(e.g., rational), so that computability is meaningful, a \emph{gate} is a computable map $g:(\A\setminus\{\noop\})^{*}\times\A\times[0,1]^{m}\to\Dec$
+(the $m$ judge scores; the oracle case of T1 restricts the last argument to $\{0,1\}^{m}$ and lets $g$ be computable relative to $\Pi$, reusing bits returned at earlier steps),
+$\Dec=\{\allow,\block,\subst(a')\}$, deciding before the (irreversible) action commits from the
+committed \emph{effect} history (blocks leave no effect to condition on), the proposed action,
+and the scores. Against a proposal stream it induces a committed trace ($\allow$ keeps $a$; $\block$
+commits $\noop$; $\subst(a')$ commits $a'$). $g$ is \emph{sound} if for \emph{every} stream the
+committed trace is safe for $P$ (Def.~\ref{def:actions}: no finite prefix of its effect trace
+is a bad prefix of $P$, and an infinite effect trace lies in $P$); \emph{transparent} if for every stream whose \emph{proposed} effect
+trace lies in $P$ the committed effect prefix equals the proposed effect prefix \emph{at every
+step} (prefixwise, so no action of a compliant trace is ever blocked or altered);
+\emph{precise} if both (precise enforcement in the sense of
+\citet{ligatti2005edit}: no buffering). For horizon $H$ and
+distribution $\Pdist$, an episode is \emph{unsafe} if some committed effect prefix is a
+bad prefix of $P$, and the \emph{utility loss} is
+$U(g)=\frac1H\sum_{t=1}^{H}\Pdist[g\ \text{alters }a_t\mid\text{the proposed }a_t\ \text{is
+compliant}]$, the per-step rate, where $a_t$ is \emph{compliant} if the committed effect history
+extended by $a_t$ is a good prefix of $P$ (oracle regime) or its ground-truth predicate is $0$
+(judge regime, Def.~\ref{def:judge}).
+\end{definition}

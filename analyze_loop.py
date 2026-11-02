@@ -3,7 +3,7 @@ per-(suite,judge,theta) records from run_loop.py) and produces, per suite and
 pooled across suites: end-to-end attack-success and task-utility rates with Wilson
 95% intervals, the gating fraction, and two-sided Fisher exact tests of each gate
 against its own no-gate baseline. Every condition shares ONE endpoint and a
-temperature-0 agent+judge, so the comparison is controlled. Usage:
+temperature-0 judge; the agent samples at the endpoint default (agentdojo 0.1.35 drops a temperature of 0). Usage:
     python analyze_loop.py loop_allsuites.json
 """
 import sys, json, math

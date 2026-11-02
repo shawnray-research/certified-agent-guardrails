@@ -3,7 +3,7 @@
 The 9B that anchors the AgentDojo ceiling was run in the closed loop, sweeping its
 operating point theta in {0.90,0.95,0.98} on the two injectable suites, against the
 same matched no-gate baselines as loop_allsuites.json (banking 12/144, slack 25/105;
-same 7B agent, temperature 0, one fixed endpoint). Prints attack success, gating rate,
+same 7B agent at the endpoint default temperature, judge at temperature 0, one fixed endpoint). Prints attack success, gating rate,
 utility, and a two-sided Fisher exact test vs baseline for each operating point.
 """
 import json, os, sys

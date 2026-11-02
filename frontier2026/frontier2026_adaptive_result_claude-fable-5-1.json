@@ -1,0 +1,12 @@
+{
+ "judge": "claude-fable-5-1",
+ "n_flag": 26,
+ "theta": 0.62,
+ "benign_miss": 0.038461538461538464,
+ "attacked_miss": 0.15384615384615385,
+ "eta": 0.11538461538461539,
+ "pushed_below": 4,
+ "rewrites": 156,
+ "refused_rewrites": 96,
+ "errors": 0
+}

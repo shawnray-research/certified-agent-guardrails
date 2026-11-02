@@ -1,0 +1,36 @@
+\begin{table}[t]
+\caption{Which part of the context matters (one run; \texttt{toolcall\_incontext\_ablation.py}). Each row adds one
+part of the judge's input: the user request, then the executed calls with their tool outputs, then the sentence
+stating that tool outputs are untrusted (``untrusted note''; the full in-context prompt of Table~\ref{tab:incontext}). AUC of V1 against
+C0 and C1; cross-fitted $\delta=.10$ gate as in Table~\ref{tab:incontext}.}
+\label{tab:incontext-ablation}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llccccc@{}}
+\toprule
+& & \multicolumn{2}{c}{AUC, V1 vs.} & \multicolumn{3}{c}{$\delta=.10$ gate} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-7}
+Judge & judge input & C0 & C1 & miss & FB C0 & FB C1 \\
+\midrule
+Opus 5.5 & action only & .842 & .835 & .132 & .537 & .597 \\
+ & + user request & .995 & .993 & .095 & .003 & .002 \\
+ & + tool outputs & 1.000 & .882 & .078 & .000 & .192 \\
+ & + untrusted note & .992 & .903 & .098 & .013 & .163 \\
+\addlinespace
+GPT-5.5 & action only & .836 & .763 & .132 & .437 & .526 \\
+ & + user request & .962 & .948 & .103 & .215 & .277 \\
+ & + tool outputs & .999 & .998 & .067 & .000 & .021 \\
+ & + untrusted note & 1.000 & .999 & .064 & .000 & .012 \\
+\addlinespace
+Haiku 5.5 & action only & .661 & .621 & .114 & .926 & .935 \\
+ & + user request & .879 & .864 & .097 & .523 & .591 \\
+ & + tool outputs & 1.000 & .932 & .085 & .003 & .198 \\
+ & + untrusted note & 1.000 & .945 & .056 & .000 & .127 \\
+\addlinespace
+Sonnet 5.5 & action only & .792 & .761 & .122 & .502 & .564 \\
+ & + user request & .874 & .895 & .091 & .466 & .515 \\
+ & + tool outputs & .976 & .927 & .058 & .027 & .087 \\
+ & + untrusted note & .976 & .968 & .058 & .027 & .038 \\
+\bottomrule
+\end{tabular}
+\end{table}

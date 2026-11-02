@@ -3,3 +3,12 @@ __pycache__/
 figures/
 .DS_Store
 *.env
+
+# paper figures are part of the submission sources
+!paper/figures/
+!paper/figures/*.pdf
+paper/*.log
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.out

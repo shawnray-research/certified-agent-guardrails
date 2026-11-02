@@ -17,8 +17,11 @@ bc = json.load(open(f"{HERE}/bench_scores_cache.json"))
 nine = np.array([bc.get(f"gemma2:9b::::{t}", np.nan) for t in bench], float)   # 9B reference
 
 def auc(s, yy):
+    # Mann-Whitney AUC, P(pos > neg) + 0.5 P(tie); vectorized (exactly the pairwise mean).
     u, v = s[yy == 1], s[yy == 0]
-    return float(np.mean([(a > b) + 0.5 * (a == b) for a in u for b in v])) if len(u) and len(v) else float("nan")
+    if not (len(u) and len(v)): return float("nan")
+    d = u[:, None] - v[None, :]
+    return float(((d > 0).sum() + 0.5 * (d == 0).sum()) / d.size)
 
 def paired_p(sX, s9, yy, B=5000, seed=0):
     rng = np.random.default_rng(seed)

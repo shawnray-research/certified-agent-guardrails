@@ -9,7 +9,7 @@ import matplotlib as mpl
 
 def apply_style():
     mpl.rcParams.update({
-        "pdf.fonttype": 42,                # embed TrueType, not Type 3 (AAAI PDF rule)
+        "pdf.fonttype": 42,                # embed TrueType, not Type 3 (PDF font-embedding rule)
         "ps.fonttype": 42,
         "font.family": "serif",
         "font.serif": ["Times New Roman", "Times", "Nimbus Roman", "DejaVu Serif"],

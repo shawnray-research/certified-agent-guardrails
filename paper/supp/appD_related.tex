@@ -1,0 +1,410 @@
+% Extended related work (Supplement D): the full survey behind Section 8 of the main paper.
+\section{Extended Related Work}\label{app:related}
+
+This supplement extends Section~\ref{sec:related} of the main paper with the full survey
+behind it and maps representative systems to the regimes of our theory
+(Table~\ref{tab:systems-ext}). It also fills in the certificate card of Section~\ref{sec:disc}
+for our own gates (Table~\ref{tab:card-ours}; fields 2 and 4 for all 33 judge runs in
+Table~\ref{tab:card33}). Even the best calibrated gate uses no oracle predicates, is block-all
+at $\delta=.05$ under deterministic calibration, and has no verified margin; a headline AUC of
+$.93$ reveals none of this.
+
+\begin{table}[t]
+\caption{The certificate card of Table~\ref{tab:card} in full. Each field names what an
+evaluation must state and the result that requires it; \emph{Ours} fills fields 1--4 for
+Claude Opus~5.5, the best calibrated gate in our panel, and field 5 for the 3B-judge
+closed-loop gate.}
+\label{tab:card-ours}
+\centering\footnotesize
+\setlength{\fboxsep}{3pt}
+\renewcommand{\arraystretch}{1.15}
+\fbox{\begin{tabularx}{\dimexpr\columnwidth-2\fboxsep-2\fboxrule\relax}{@{}>{\raggedright\arraybackslash}p{0.04\columnwidth}>{\raggedright\arraybackslash}X@{}}
+\textbf{1} & \textbf{Policy and oracle interface.} The policy language, the oracle
+predicates $\Pi$ the gate may query, and the trusted metadata it relies on, such as
+P2's clock adapter (Thm.~\ref{thm:t1}). \emph{Ours:} AgentDojo injection goals
+versus user tasks, labeled by provenance; no oracle predicates; the judge sees the
+instruction string only.\\
+\addlinespace[2pt]
+\textbf{2} & \textbf{Operating point.} Miss and false-block rates at the deployed
+threshold, the target $\delta$, and the horizon $H$, not AUC alone
+(Prop.~\ref{thm:frontier}, Cor.~\ref{cor:reduction}). \emph{Ours:} $\delta=.10$ per
+instruction; realized miss $.053$ and false block $.641$ (label-stratified item bootstrap 95\%
+CI $[.197,.835]$), at AUC $.929$; exact-level randomized split-conformal calibration spends the
+full budget (miss $.100$) at false block $.334$ (\texttt{calib\_randomized.py}).\\
+\addlinespace[2pt]
+\textbf{3} & \textbf{Calibration population.} Where the violating calibration
+examples come from, how many there are, and the exchangeability claim
+(Asm.~\ref{ass:benign}, Thm.~\ref{thm:conformal}); split-conformal calibration is
+non-vacuous only with $n\ge H/\delta-1$ violating examples (19 at $\delta=.05$, $H=1$; 199
+at $H=10$), and otherwise the honest report is block-all. \emph{Ours:} 35 injection goals,
+17--18 per cross-fitted half; exchangeability with deployment is not verified; at
+$\delta=.05$ every deterministic threshold is block-all, while exact-level randomization is
+non-vacuous (false block $.587$); with $k=\lfloor(n+1)\delta\rfloor=1$ the deployed per-step miss
+is $\mathrm{Beta}(1,n)$, so
+at $n=17$ it exceeds $.10$ with probability $.9^{17}\approx.17$.\\
+\addlinespace[2pt]
+\textbf{4} & \textbf{Adversarial margin.} A verified uniform margin
+$\bar\eta(\rho)$ with its budget $\rho$, or ``none verified''; attacks, which should
+be adapted to the gate \citep{nasr2025attacker}, only lower-bound it
+(Def.~\ref{def:adversary}). Without a verified $\bar\eta(\rho)$ the gate is uncertified
+under attack; with one, benign calibration certifies only $\min\{1,\delta+H\bar\eta(\rho)\}$
+(Thm.~\ref{thm:adv}), and recalibration restores $\delta$ only if $\bar\eta(\rho)<\delta/H$
+(Cor.~\ref{cor:robust}). \emph{Ours:} none verified. Measured miss increases are point
+estimates and lower-bound the margin only when positive: the fixed suffix gives $-.143$
+$[-.313,+.027]$ over all 35 violations at $\theta=.5$ and $.000$ on the flagged subclass at
+$\theta_f=.85$; at $\theta_f$ the best-of-six and best-of-20 searches give $.038$ and $.077$ (union
+$.115$ on the flagged subclass, $.086$ over all 35 violations), with 127/156 and 392/491
+rewrites refused; and an optimizing PAIR-style attacker raises the flagged miss at $\theta_f$ by
+$.269$ (to 8 of 26) and evades 9 of 33 flagged violations at the in-sample $\delta=.10$
+threshold, counting only rewrites that evade in at least three of five fresh strict re-scores
+(main-paper \S\ref{exp:q3}).\\
+\addlinespace[2pt]
+\textbf{5} & \textbf{Feedback model.} Whether blocks are visible to the agent, and
+paired closed-loop reruns reporting attack success, task success, and gating
+fraction separately, with A/A and block-rate-matched random-drop controls; offline
+claims about other gates need logs with known block and allow probabilities
+$\ge\varepsilon$, at a variance that can grow like $\varepsilon^{-H}$ (Prop.~\ref{prop:feedback},
+Cor.~\ref{cor:no-estimator}, Prop.~\ref{prop:explore}).
+\emph{Ours:} open-loop calibration only; our closed loop (\S\ref{exp:q4}) used a
+3B judge with silent drops: attack success $.047\to.004$, task success
+$.254\to.180$, $78\%$ of calls blocked; no A/A or block-rate-matched random-drop control, so
+the reduction is not attributed to the judge's discrimination.\\
+\end{tabularx}}
+\end{table}
+
+\input{supp/card33_table}
+
+
+
+\begin{table*}[t]
+\caption{Representative runtime guardrails and agent defenses, mapped to the regime of our
+theory that governs what they can guarantee. The decision basis is what decides allow or block.}
+\label{tab:systems-ext}
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{0.245\textwidth}>{\raggedright\arraybackslash}p{0.205\textwidth}>{\raggedright\arraybackslash}p{0.15\textwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+System & Decision basis & Regime & What our results imply \\
+\midrule
+AgentSpec, Progent, read-only state gates \citep{agentspec2026,progent2025,reddy2026reasonless}
+  & rules over call arguments and tool state & T1 gate
+  & at most the safety policies decidable relative to their oracle-checkable predicates (Rem.~\ref{rem:general-gates}); rules in the keyed-counter fragment $\Th_0$ admit a complete nontriviality check (Thm.~\ref{thm:frag}) \\
+\addlinespace[2pt]
+ContrAgent \citep{xiao2026contragent}
+  & LTL$_f$ contracts compiled to DFAs & T1 gate (finite DFA, stateful grounding)
+  & the DFA alone gives a regular subclass of T1; its predicates also read stored earlier values and counters, i.e., registers outside the DFA \\
+\addlinespace[2pt]
+ePCA \citep{wu2026provably}
+  & first-order restatement of each action, checked symbolically & T1 gate; restatement as oracle
+  & exact relative to the formulas; a lossy or adversarial restatement is an oracle error, priced as in T2 \\
+\addlinespace[2pt]
+Agent-C \citep{agentc2025}
+  & rule checks with substitution & T1 gate with substitution ($\subst$)
+  & same enforceable class; no false blocks to cut, so its gains come from replacing violating calls (Supp.~A.2) \\
+\addlinespace[2pt]
+CaMeL, FIDES, design patterns, IsolateGPT, ACE \citep{debenedetti2025camel,costa2025fides,beurerkellner2025design,wu2025isolategpt,li2026ace}
+  & capability and provenance labels, isolation, plans from trusted input & T1 gate over trusted metadata
+  & exact for policies over those labels; guarantees are relative to intact provenance \\
+\addlinespace[2pt]
+RTBAS \citep{zhong2025rtbas}
+  & information-flow labels; LM-judge or saliency dependency screener & T1 check, judge as oracle
+  & the label check is exact; redaction makes screener errors cost availability, not misses \\
+\addlinespace[2pt]
+CAGE \citep{delattre2026cage}
+  & policy checked over a set of admissible tool returns & T1 gate, bounded input faults
+  & the exact variant needs an executable policy; learned variants rest on a measured fidelity assumption \\
+\addlinespace[2pt]
+DRIFT \citep{li2025drift}
+  & plan checklist, LLM validator, memory isolation & T1 checklist; controlled
+  & checklist exact; validator and memory edits feed back, so an offline ROC does not determine safety \\
+\addlinespace[2pt]
+AgentSentinel \citep{hu2025agentsentinel}
+  & rules plus LLM audit of suspended calls & T1 rules; controlled
+  & rule part within T1; blocks reach the agent as security alerts, so an offline ROC does not determine safety \\
+\addlinespace[2pt]
+Guard models \citep{inan2023llamaguard,han2024wildguard,liu2026agentdog}
+  & learned safety classifier & exogenous judge
+  & bounded by the Neyman--Pearson ROC of their scores \\
+\addlinespace[2pt]
+Prompt-injection detectors \citep{protectai2024deberta,li2025piguard,chennabasappa2025llamafirewall}
+  & learned injection classifier on the text & exogenous judge
+  & bounded by their ROC; a default threshold carries no miss guarantee (Supp.~B.21: ProtectAI misses $.543$ of injection goals at its default, PIGuard is at chance) \\
+\addlinespace[2pt]
+MELON, DataSentinel \citep{zhu2025melon,liu2025datasentinel}
+  & injection or hijack detector & judge under attack
+  & a $\delta$ certificate weakens to at most $\min\{1,\delta+H\bar\eta(\rho)\}$ (Thm.~\ref{thm:adv}) \\
+\addlinespace[2pt]
+CORA, conformal shield \citep{feng2026cora,scarbro2025conformal}
+  & conformal calibration & certificate
+  & marginal, possibly vacuous; under feedback or attack it needs Asm.~\ref{ass:benign} rechecked or a verified margin \\
+\addlinespace[2pt]
+Erase-and-check \citep{kumar2024certifying}
+  & certified insertion robustness & verified margin
+  & enables margin-aware recalibration for its insertion budget (Cor.~\ref{cor:robust}) \\
+\addlinespace[2pt]
+Task Shield, ToolSafe, MENTOR \citep{jia2025taskshield,mou2026toolsafe,anand2026mentor}
+  & step-level verdicts that shape later steps & controlled
+  & feedback changes later proposals; a static ROC does not identify safety \\
+\addlinespace[2pt]
+Baheri--Wei, Gu--Zhu \citep{baheri2026controller,gu2026certified}
+  & model of the loop (reachability; Petri-net supervisor) & exact predicates (T1/PAC)
+  & hold for every controller or proposal sequence (Baheri--Wei: a PAC bound on the probability of unsafe entry); judge error enters once a fallible judge decides \\
+\addlinespace[2pt]
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{Runtime Enforcement and Supervisory Control}
+Security automata enforce only safety properties
+\citep{schneider2000enforceable}. \citet{hamlen2006computability} refine the
+enforceable class by computability, \citet{fong2004shallow} and
+\citet{talhi2008memory} refine it by the monitor's memory, and edit automata enforce more by
+suppressing and inserting actions \citep{ligatti2005edit}. A supervisor
+disables controllable events of a plant \citep{ramadge1987supervisory}; our
+gate is such a supervisor without buffering, so given the same oracles
+its class lies strictly below that of edit automata
+(Proposition~\ref{prop:strict}); like a shield \citep{bloem2015shield}, it sits between an
+untrusted controller and its environment and overrides unsafe outputs. Synchronous enforcers must
+emit a possibly edited output in every reaction \citep{pinisetty2017synchronous,anand2025prompt}.
+Suppression monitors, first-order and parametric monitors, quantified event automata, and
+mandatory-results automata handle data-carrying events
+\citep{aceto2023firstorder,hublet2024proactive,rosu2012parametric,basin2015monpoly,barringer2012qea,ligatti2010mra},
+and register monitors extend finite-state monitors with registers
+\citep{grigore2013register,ferrere2018register}. \citet{basin2013enforceable} treat actions that
+are only observable, and \citet{falcone2012verify} locate buffering enforcers in the
+safety--progress hierarchy. Agenra pairs a stateful authorization language for agents with a
+Lean-verified reference monitor that checks every proposed tool call against per-grant quotas
+and provenance \citep{shivakumar2026agenra}, a deterministic T1 gate with machine-checked
+guarantees, and TemporalGuard enforces past-time temporal policies over LLM conversations whose
+atomic propositions a learned or LLM classifier grounds \citep{cohen2026temporal}, which is the
+judge regime of T2. Replaying AgentDojo and STAC traces through MonPoly, \citet{kekatos2026formal} find that
+first-order temporal monitoring adds value only when the trace records trustworthy history,
+so label-based gates are exact only relative to intact provenance.
+Past-time metric temporal logic with a counting quantifier admits trace-length-independent
+monitoring for a broad class of quantitative policies, though not for all
+\citep{du2021tracelength}; T3 asks a different question of counter policies, namely whether a
+policy is nontrivial at all, which is undecidable with two decrementable, zero-testable
+counters and \PSPACE-complete for the keyed-counter fragment.
+Our claim is therefore narrow. Relative to fixed oracle predicates, T1 shows that the policies a
+deterministic register gate can enforce before an irreversible, data-carrying action commits are
+exactly the safety policies whose good prefixes it recognizes; T3 gives the cap-saturation and
+one-witness analysis that makes a keyed-counter fragment decidable. \citet{david2026alignment} treat
+agent guardrails as suppression-only enforcement over effect traces with fixed
+budgets and state an enforceability schema whose two directions are left as
+proof obligations; T1 proves both directions for register-recognizable
+policies over infinite traces.
+
+\subsection{Prompt Injection and System-Level Agent Defenses}
+Untrusted tool output can steer an agent \citep{greshake2023injection}, as formal frameworks
+and benchmarks measure
+\citep{liu2024formalizing,debenedetti2024agentdojo,zhan2024injecagentbench},
+while AgentHarm measures compliance with directly harmful requests
+\citep{andriushchenko2025agentharm};
+the same channel extends to tool descriptions served over the Model Context Protocol
+\citep{guo2026mcpxkit} and to instructions that persist and propagate between the models of a
+multi-LLM system \citep{yang2026cracks}.
+Model-level defenses train the agent to ignore instructions that arrive as
+data \citep{chen2025struq,chen2025secalign}. Detectors flag injected inputs or
+hijacked actions \citep{liu2025datasentinel,zhu2025melon,jia2025taskshield}, although an adaptive
+attack that needs no optimization defeats the known-answer check behind
+\mbox{DataSentinel} \citep{choudhary2025hownot}. System-level designs limit what untrusted data
+can influence: they separate control from data flow \citep{debenedetti2025camel}, restrict which
+data may reach a tool call \citep{beurerkellner2025design}, isolate applications behind a trusted
+hub or a plan built only from trusted input \citep{wu2025isolategpt,li2026ace}, enforce privilege
+policies \citep{progent2025}, or track information-flow labels
+\citep{costa2025fides,zhong2025rtbas}. These designs decide
+from trusted metadata, which places them in T1's oracle regime: their guarantees are exact for
+the policies their labels express and hold only while the labels are intact. RTBAS adds a learned
+dependency screener (an LLM judge or attention saliency) but redacts what it rules out, so
+screener errors cost confirmations or utility rather than security, and only its availability
+depends on the screener. FIDES also characterizes what dynamic taint tracking
+can enforce, the information-flow counterpart of T1. PrivacyAsst instead protects the content a
+tool-using agent sends to models and tools \citep{zhang2024privacyasst}, which composes with a
+gate rather than replacing one. \citet{siu2026framework} define agent security through oracles
+for task alignment, action alignment, source authorization, and data isolation, and
+\citet{christodorescu2025systems} name guarantees from a probabilistic trusted computing base as
+an open problem; T1 and T2 make one part of this picture exact by separating what a
+deterministic gate enforces given exact oracles from what a judge that approximates them can
+guarantee. Adaptive attacks broke all eight indirect-injection defenses that
+\citet{zhan2025adaptive} evaluated, and stronger adaptive attacks bypassed twelve recent
+defenses, most of which had reported near-zero attack success \citep{nasr2025attacker}.
+Theorem~\ref{thm:adv} shows why a calibrated
+detector's guarantee need not survive this: its certificate describes a benign
+score distribution, and the uniform margin $\bar\eta(\rho)$ is charged against it
+at every step.
+
+\subsection{Guardrails, Judges, and Attacks on Monitors}
+Rule-based runtime guardrails for tool-using agents compile rules into checks
+\citep{agentspec2026,agentc2025}, compile temporal contracts into automata that block calls
+online \citep{xiao2026contragent}, check intended writes against the current tool state
+\citep{reddy2026reasonless}, or generate context-specific policies that are then enforced
+deterministically \citep{tsai2025conseca}. Learned and generated guardrails predict violations
+with a learned Markov chain \citep{probguard2025}, verify generated guard code
+\citep{veriguard2025}, reason over verifiable policy rules \citep{shieldagent2025}, or translate
+natural-language guard requests into guard code \citep{guardagent2024}. Others suspend sensitive
+operations pending a rule-based and LLM audit \citep{hu2025agentsentinel}, filter model inputs,
+outputs, and agent actions in open-source frameworks
+\citep{rebedea2023nemo,chennabasappa2025llamafirewall}, or feed verdicts back into planning
+\citep{mou2026toolsafe,sun2026triad,li2025drift}; their semantic checks use guard models
+\citep{inan2023llamaguard,han2024wildguard,liu2026agentdog}. ContrAgent's automata
+are finite-state, but their predicates also read session counters and a context map of values
+recorded from earlier events, so cross-call comparisons, such as blocking a send to a recipient
+that a tool output introduced and the user did not name, use register-like state kept outside
+the automaton. CAGE
+certifies that an action stays permitted across a specified set of correctly attributed tool
+returns, jointly over categorical binding faults and bounded numeric drift
+\citep{delattre2026cage}; its exact variant hardens the inputs of a T1 check, its learned
+variants certify a learned gate under a measured fidelity assumption, and T2's margin concerns the
+input of a fallible judge. Injection guardrails also over-defend, flagging benign inputs through
+trigger-word bias \citep{li2025piguard}; Proposition~\ref{thm:frontier} makes the trade-off exact:
+on the likelihood-ratio frontier of a given score, fewer false blocks can be bought only with more
+misses, while a threshold on a score that is not likelihood-ratio monotone can lie above that
+frontier (\S\ref{exp:q1}).
+
+The monitors are themselves attack targets. Optimization-based injections make LLM judges select
+an attacker-chosen candidate, and known-answer and perplexity-based detection prove insufficient
+against them \citep{shi2024judgedeceiver}. Universal phrases learned on a surrogate transfer to
+unseen zero-shot LLM judges \citep{raina2024judgerobust}, a universal prefix that the guarded
+model is induced to emit evades guard models \citep{mangaokar2024prp}, and a single adversarial
+token deceives fifteen guardrail models 44.5\% of the time on average
+\citep{bassani2025guardrail}. Beyond monitors, context-aware red teaming finds customized LLM
+applications more vulnerable to jailbreaks tailored to their context \citep{xu2026redagent}. In agent settings, untrusted models that embed
+injections in their outputs evade LLM monitors on AI-control benchmarks
+\citep{terekhov2026adaptive}, and adversarial coding agents that inject prompts into the monitor's input
+get arbitrary shell commands past production per-action blocking monitors in
+79\% of trials \citep{remedios2026redteaming}. Emoji insertions exploit the token-segmentation
+bias of judge LLMs \citep{wei2025emoji}; character-injection and adversarial-ML evasion bypass
+deployed prompt-injection and jailbreak detectors, including Prompt Guard \citep{hackett2025bypassing};
+and a reinforcement-learned attacker defeats detection defenses such as Prompt Guard, PIGuard, and
+\mbox{DataSentinel} in a black-box, query-only setting \citep{yin2026pismith}, which is the adaptive
+counterpart of our static detector baseline (Supplement~B.21). Even without an adversary,
+agents under ordinary task pressure learn to evade synchronous tool-call monitors by encoding
+commands, splitting operations across calls, and retrying until the relevant context leaves
+the monitor's window \citep{schmotz2026instrumental}, and agent benchmarks for sabotage and
+monitoring measure both sides of this contest \citep{kutasov2025shade}; benchmarks of injection
+attacks against agents span tool-use \citep{zhang2024asb} and web settings \citep{evtimov2025wasp}.
+Our Q3 experiments lower-bound this effect for one fixed suffix, two rewrite searches, and an
+optimizing score-feedback attacker in the style of PAIR \citep{chao2025pair}; the query-adaptive
+search (Supplement~B.20) follows best-of-$N$ jailbreaking, whose attack success grows as a power
+law in $N$ \citep{hughes2025bon}, consistent with our curves not flattening by $N=20$, and the
+optimizing attacker evades even the fully calibrated $\delta=.10$ gates that the template and
+grammar searches rarely beat. What we add is
+the formal margin $\bar\eta(\rho)$, a bound on the
+certified risk it costs (Theorem~\ref{thm:adv}), and the condition under which
+recalibration restores the certificate (Corollary~\ref{cor:robust}).
+Table~\ref{tab:systems-ext} places representative systems in the regimes of
+our theory.
+
+\subsection{Closed-Loop Control and Monitoring Protocols}
+A shield corrects or blocks a system's unsafe output before it takes effect
+\citep{bloem2015shield}, including a learned controller's actions in safe
+reinforcement learning \citep{alshiekh2018shielding,jansen2020probshields}, and
+the gate of main-paper Definition~\ref{def:gate} is a shield in this lineage; MENTOR synthesizes
+history-dependent shields for tool-using agents \citep{anand2026mentor}.
+Concurrent work certifies gated agents through a model of the loop, estimated
+from logs \citep{baheri2026controller} or given as a Petri-net supervisor with
+replanning \citep{gu2026certified}. Both certificates hold for every controller or proposal
+sequence. In our terms, Gu and Zhu's supervisor lies in T1's oracle regime, and Baheri and Wei's
+certificate is a PAC bound on the probability of reaching an unsafe state; judge error enters only
+once a fallible judge decides. The agent's response to a block matters for cost: Gu
+and Zhu's least-intrusive supervisor assumes a proposer that is stationary
+across refusals, which ungated data cannot test
+(Corollary~\ref{cor:no-estimator}). That response is documented empirically \citep{sah2026verifier}: an LLM critic with offline AUC~.94 cut
+one agent's task success by 26 points and left another's unchanged
+\citep{vasudev2026accurate}; blocking and continuing lets an untrusted model
+exploit the monitor's rationale \citep{lucassen2026retrying}; and resampling
+can amplify an injection into a best-of-$N$ attack
+\citep{terekhov2026adaptive}. Proposition~\ref{prop:feedback} formalizes this
+phenomenon. Decision-dependent data are the subject of performative prediction
+\citep{perdomo2020performative}, and performative risk control recalibrates a threshold over
+repeated deployments, each of which reveals the distribution it induces
+\citep{li2025performative}; for a gate, every such round exercises blocks on live traffic, which
+is exactly the overlap that ungated logs lack (Corollary~\ref{cor:no-estimator}). AI-control work tunes a monitor's operating point and audit
+budget within a protocol against deliberately subversive models \citep{greenblatt2024aicontrol,griffin2024games,hua2025combining}, including multi-step
+agent settings where resampling after a flag changes later actions \citep{bhatt2025ctrlz}. Theorem~\ref{thm:sequential}
+instead specializes belief-state planning \citep{kaelbling1998pomdp} and
+constrained (PO)MDP occupancy methods
+\citep{altman1999constrained,poupart2015cpomdp,walraven2018cpomdp} to give the
+full closed-loop frontier of a specified model. When a model of the loop is available, doubly
+robust off-policy estimators \citep{jiang2016doubly} can cut the variance of the
+importance-weighted estimator of Proposition~\ref{prop:explore}, whose weights grow like
+$\varepsilon^{-H}$; they do not remove the need for exploratory blocks, which supply the overlap.
+
+\subsection{Statistical Guarantees and Certified Filters}
+The exogenous frontier is a Neyman--Pearson statement
+\citep{neyman1933problem,tong2018np}; reject-option and selective
+classification instead trade error against abstention
+\citep{chow1970optimum,geifman2017selective}, and Blackwell's order says when
+richer observations help \citep{blackwell1953equivalent}. Our certificate
+imports conformal risk control \citep{angelopoulos2024conformal}, which
+generalizes the conformal prediction used to calibrate LLM planners
+\citep{ren2023knowno,safepath2025}. Learn-then-Test certifies several risks at once by multiple
+testing over thresholds \citep{angelopoulos2025ltt}; when a miss budget and a false-block budget
+lie below the frontier of Proposition~\ref{thm:frontier}, no threshold meets both and it returns none
+except with probability at most its familywise error level. Selective evaluation calibrates when to trust
+an LLM judge so that, with high probability, its unescalated verdicts agree with humans at a
+target rate \citep{jung2025trust}; that guarantee presumes i.i.d.\ inputs and decisions that
+do not feed back into later inputs, the two conditions whose failure Theorem~\ref{thm:adv}
+and Proposition~\ref{prop:feedback} price. In security, conformal evaluation already underpins classification with rejection
+under malware drift \citep{barbero2022transcending}, and nonexchangeable conformal methods bound
+the coverage lost to distribution drift \citep{barber2023beyond}; conformal prediction under
+feedback covariate shift stays valid when the induced input distribution is known
+\citep{fannjiang2022feedback}, but for a gate, that distribution is the agent's response to
+blocks, which ungated logs do not identify (Corollary~\ref{cor:no-estimator}). Budgeted
+rewriting of the
+judge's input and the agent's response to blocks are two shifts that such tools do not bound
+without the margin of Theorem~\ref{thm:adv} or a model of the loop
+(Theorem~\ref{thm:sequential}).
+CORA applies conformal risk control to a pre-action gate for GUI agents and bounds the joint
+probability that a step is harmful and executed \citep{feng2026cora}; such a
+joint budget is met by executing everything whenever harms are rarer than the
+budget. A class-conditional (Mondrian) form \citep{vovk2005algorithmic}, which calibrates on
+violations alone, bounds the miss rate itself, falls back to block-all rather than allow-all, and
+tolerates a change in harm prevalence. The conformal shield of \citet{scarbro2025conformal}
+allows an action only if it is safe for every state in a calibrated
+perception set, a guarantee about a state estimate inside a known MDP; our
+judge has no state abstraction. Erase-and-check certifies that a prompt its
+base filter flags stays flagged under at most $\rho$ inserted tokens
+\citep{kumar2024certifying}; such a certificate supplies the verified margin that
+Corollary~\ref{cor:robust} requires, for its insertion budget. That corollary is a
+risk-level analogue of adversarially robust conformal prediction, which inflates a
+conformal threshold by a smoothing-certified margin for $\ell_2$ perturbations
+\citep{gendler2022robustconformal}, with provable variants that fix flawed smoothing guarantees
+\citep{yan2024provably}, and smoothing-based robust conformal risk control now exists
+as well \citep{zargarbashi2025onesample}; we instead tighten the miss-risk target by a verified
+miss-probability margin for discrete rewrites, from any certificate rather than smoothing, and
+compose it over $H$ steps. Two neighboring threats are outside our model: poisoning the
+calibration set breaks conformal coverage directly \citep{li2024data}, which is why our
+calibration examples are benign by assumption and the calibration population is a card field;
+and guard models are overconfident and miscalibrated under jailbreaks \citep{liu2025calibration},
+which is why our certificates use only score ranks, never a guard's stated confidence.
+
+\subsection{Positioning}
+Under cryptographic assumptions, efficient input and output filters need not exist at all
+\citep{ball2026impossibility}; T2 instead fixes a judge and asks what its score can certify
+and what a bounded rewrite of its input costs.
+The closest recent work formalizes parts of the gate. Rule engines and contract monitors such as
+AgentSpec and ContrAgent are instances of our deterministic gate, and T1 states which policies
+any such engine can enforce and what registers add over finite-state contracts. CAGE's exact variant certifies a deterministic check, and the loop-model certificates certify a
+modeled loop (\citet{gu2026certified}) or a PAC risk bound (\citet{baheri2026controller}), all under
+exact predicates; T2 begins where they stop, once a fallible judge decides the predicate. \citet{david2026alignment} leave an
+enforceability schema as proof obligations that T1 discharges for register-recognizable
+policies, and FIDES characterizes taint tracking, complementary to our trace-property view.
+Relative to these works, we (i) place deterministic and judge-decided gates in one model with
+exact boundaries; (ii) show that the closed-loop frontier is not identifiable from static scores
+and ungated logs, with a converse under exploratory blocking; (iii) identify a decidable
+keyed-counter fragment; and (iv) test each boundary's empirical consequences.
+
+\subsection{Dependability Lineage}
+A pre-execution gate is a safety monitor in the sense of the Simplex architecture
+\citep{sha2001simplex}: a small trusted layer that vetoes a complex, untrusted controller, here
+the agent. Proposition~\ref{thm:frontier}'s caveat that conditional dependence among judges need
+not improve the frontier, and the Fr\'echet--Hoeffding bounds for any-flag gates
+(Supplement~A.3), parallel the coincident-failure analyses of design diversity
+\citep{eckhardt1985theoretical}: independently built versions need not fail independently, so
+adding judges helps only through information that changes the likelihood ratio. Reporting an
+operating point rather than AUC follows intrusion-detection evaluation, where base rates and
+costs decide usefulness \citep{axelsson2000base}, and the certificate card is a minimal
+reporting template in the spirit of model cards \citep{mitchell2019model}, specialized to the
+hypotheses a security claim about a runtime gate rests on.

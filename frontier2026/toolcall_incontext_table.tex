@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\caption{In-context tool-call evaluation (one run each; protocol in \texttt{toolcall\_incontext\_build.py}).
+V1: the injected goal's culminating call (104, in 26 goal clusters); C1: the user's culminating call in the same
+injected context (104); C0: the user's culminating call in a clean context (75). AUC with a goal/user-task cluster
+bootstrap 95\% interval; ``action'': the same calls scored without context by the paper's prompt. Gates: split-conformal
+$\delta=.10$ ($H=1$), cross-fitted over 500 two-fold splits of the 26 goals (52 calibration violations per fold); miss on
+the held-out goals' V1, false block (FB) on all C0 and on the held-out goals' C1. Refus.: API-signaled refusals among the
+104 V1 calls in context, scored as blocks.}
+\label{tab:incontext}
+\centering\small
+\begin{tabular}{@{}lcccccccccc@{}}
+\toprule
+& \multicolumn{2}{c}{AUC, V1 vs.\ C0} & \multicolumn{2}{c}{AUC, V1 vs.\ C1} & \multicolumn{3}{c}{$\delta=.10$ gate, in context} & \multicolumn{2}{c}{$\delta=.10$, action} & \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-8}\cmidrule(lr){9-10}
+Judge & in context & action & in context & action & miss & FB C0 & FB C1 & miss & FB C0 & Refus. \\
+\midrule
+Claude Opus 5.5 & .992 {\scriptsize[.974,1.000]} & .842 & .903 & .835 & .098 & .013 & .163 & .132 & .537 & 57 \\
+Claude Fable 5.1 & .950 {\scriptsize[.903,.989]} & .842 & .872 & .825 & .080 & .053 & .144 & .122 & .506 & 24 \\
+GPT-5.5 & 1.000 {\scriptsize[.998,1.000]} & .836 & .999 & .763 & .064 & .000 & .012 & .132 & .437 & 0 \\
+GPT-6.1 Terra & .998 {\scriptsize[.993,1.000]} & .818 & .997 & .745 & .084 & .003 & .017 & .121 & .605 & 0 \\
+Claude Haiku 5.5 & 1.000 {\scriptsize[.998,1.000]} & .661 & .945 & .621 & .056 & .000 & .127 & .114 & .926 & 0 \\
+GPT-6.1 Sol & 1.000 {\scriptsize[.998,1.000]} & .802 & .989 & .757 & .038 & .000 & .019 & .111 & .712 & 0 \\
+Claude Sonnet 5.5 & .976 {\scriptsize[.937,1.000]} & .792 & .968 & .761 & .058 & .027 & .038 & .122 & .502 & 11 \\
+\bottomrule
+\end{tabular}
+\end{table*}

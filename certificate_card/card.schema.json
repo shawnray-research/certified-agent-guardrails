@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/shawnray-research/certified-agent-guardrails/certificate_card/card.schema.json",
+  "title": "Guardrail certificate card",
+  "description": "Five fields a runtime-guardrail evaluation must state before its numbers support a security claim (Table 2 of 'What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents').",
+  "type": "object",
+  "required": ["gate", "policy_oracle_interface", "operating_point", "calibration", "adversarial_margin", "feedback"],
+  "properties": {
+    "gate": {"type": "string", "description": "Name of the gate / judge configuration being certified."},
+    "policy_oracle_interface": {
+      "type": "object",
+      "required": ["policy_language", "oracle_predicates", "trusted_metadata", "judge_input"],
+      "properties": {
+        "policy_language": {"type": "string"},
+        "oracle_predicates": {"type": "array", "items": {"type": "string"}, "description": "Predicates decided exactly (oracle regime); empty if none."},
+        "judged_predicates": {"type": "array", "items": {"type": "string"}, "description": "Predicates decided by a fallible judge (judge regime)."},
+        "trusted_metadata": {"type": "array", "items": {"type": "string"}},
+        "judge_input": {"type": "string", "enum": ["instruction", "serialized_call", "call_in_context", "other"]}
+      }
+    },
+    "operating_point": {
+      "type": "object",
+      "required": ["delta", "horizon", "miss", "false_block"],
+      "properties": {
+        "delta": {"type": "number", "minimum": 0, "maximum": 1},
+        "horizon": {"type": "integer", "minimum": 1},
+        "threshold": {"type": ["number", "string"]},
+        "miss": {"$ref": "#/$defs/estimate"},
+        "false_block": {"$ref": "#/$defs/estimate"},
+        "auc": {"type": "number", "description": "Optional context only; never sufficient on its own."}
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "required": ["n_violations", "source", "exchangeability_claim"],
+      "properties": {
+        "n_violations": {"type": "integer", "minimum": 0},
+        "source": {"type": "string"},
+        "exchangeability_claim": {"type": "string", "description": "What makes calibration violations exchangeable with deployment violations, or 'not verified'."},
+        "non_vacuous": {"type": "boolean", "description": "True iff n_violations >= horizon/delta - 1."},
+        "training_conditional_miss": {"type": "string", "description": "e.g. 'P(miss > delta) = .17 at n = 17'."}
+      }
+    },
+    "adversarial_margin": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"type": "string", "enum": ["verified", "uncertified_under_attack"]},
+        "budget_rho": {"type": "string"},
+        "verified_margin": {"type": "number"},
+        "measured_lower_bounds": {"type": "array", "items": {"type": "object", "properties": {"attack": {"type": "string"}, "threshold": {"type": ["number", "string"]}, "miss_increase": {"type": "number"}, "queries": {"type": "integer"}}}}
+      }
+    },
+    "feedback": {
+      "type": "object",
+      "required": ["blocks_visible", "closed_loop_evaluated"],
+      "properties": {
+        "blocks_visible": {"type": "boolean"},
+        "closed_loop_evaluated": {"type": "boolean"},
+        "controls": {"type": "array", "items": {"type": "string", "enum": ["A/A", "block-rate-matched random drop", "calibrated-threshold arm"]}},
+        "attack_success": {"type": "string"},
+        "task_success": {"type": "string"},
+        "gating_fraction": {"type": "number"},
+        "exploratory_logging": {"type": "string", "description": "Known block/allow probabilities and sandboxing, if claims about other gates are made."}
+      }
+    }
+  },
+  "$defs": {
+    "estimate": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {"value": {"type": "number"}, "ci_low": {"type": "number"}, "ci_high": {"type": "number"}, "method": {"type": "string"}}
+    }
+  }
+}

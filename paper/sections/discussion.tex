@@ -1,0 +1,93 @@
+\section{Discussion and Limitations}\label{sec:disc}
+
+\paragraph{Dependability and deployment}
+Along the fault--error--failure chain of \S\ref{sec:threat} \citep{avizienis2004basic},
+fail-closed blocking turns would-be security failures into omission failures: $1-\beta$ is the
+gate's error-detection coverage and false blocks are its availability cost; even expensive gates
+fall to an optimizing attacker (\S\ref{exp:q3}), and the score band a judge cannot resolve is
+better escalated than allowed. Fail-closed scoring is also an attack
+surface: tool-output text that provokes refusals or high scores induces false blocks, a
+denial-of-service lever that Theorems~\ref{thm:conformal} and~\ref{thm:adv}, which bound only
+misses, do not price.
+
+\paragraph{A certificate card for guardrail evaluations}
+We propose that every runtime-guardrail evaluation report the five fields of
+Table~\ref{tab:card}, each required by one of our results. The \emph{Ours} lines show why:
+even our best calibrated gate uses no oracle predicates, is block-all at $\delta=.05$, and has
+no verified margin, none of which a headline AUC of $.93$ reveals. A fill-in template and a JSON
+schema for the card are in the artifact.
+
+\begin{table}[t]
+\caption{Guardrail certificate card: what an evaluation must state, the result that requires
+it, a red flag, and (\emph{Ours}) the fields and verdict for one gate, Claude Opus~5.5 on
+instruction strings.}
+\label{tab:card}
+\centering\footnotesize
+\setlength{\fboxsep}{3pt}
+\renewcommand{\arraystretch}{1.1}
+\fbox{\begin{tabularx}{\dimexpr\columnwidth-2\fboxsep-2\fboxrule\relax}{@{}>{\raggedright\arraybackslash}p{0.04\columnwidth}>{\raggedright\arraybackslash}X@{}}
+\textbf{1} & \textbf{Policy, oracle interface, judge input:} policy language, oracle
+predicates $\Pi$, trusted metadata (Thm.~\ref{thm:t1}), and what the judge sees
+(Prop.~\ref{thm:frontier}). \emph{Red flag:} a policy called enforced although a judge decides
+one of its predicates. \emph{Ours:} provenance labels; no oracle predicates; instruction
+strings.\\
+\textbf{2} & \textbf{Operating point:} miss and false block at the deployed threshold,
+target $\delta$, horizon $H$ (Prop.~\ref{thm:frontier}). \emph{Red flag:} AUC without an
+operating point. \emph{Ours:} $\delta=.10$, $H=1$, instruction strings: miss $.053$, false
+block $.641$ (95\% CI $.20$--$.83$), AUC $.929$; exact-level randomized calibration: miss $.100$,
+false block $.334$.\\
+\textbf{3} & \textbf{Calibration:} source and number $n$ of violating examples
+(non-vacuous only if $n\ge H/\delta-1$), the exchangeability claim
+(Thm.~\ref{thm:conformal}), and the training-conditional miss. \emph{Red flag:}
+$n<H/\delta-1$, so the certified gate blocks everything. \emph{Ours:} 17--18 violations per
+fold; exchangeability not verified; deterministic $\delta=.05$ is block-all (randomized: false
+block $.587$); at $n=17$ the deployed miss exceeds $.10$ with probability $.17$.\\
+\textbf{4} & \textbf{Adversarial margin:} a verified $\bar\eta(\rho)$ with its budget
+$\rho$, else ``uncertified under attack''; attacks only lower-bound it
+(Thm.~\ref{thm:adv}, Cor.~\ref{cor:robust}). \emph{Red flag:} ``robust'' backed only by
+failed attacks. \emph{Ours:} none verified; measured: fixed suffix, no increase at $\theta=.5$;
+an optimizing attacker ($\le 20$ queries) evades on $\ge$9 of 33 flagged violations at the
+in-sample $\delta=.10$ threshold (stable in fresh strict re-scores).\\
+\textbf{5} & \textbf{Feedback:} whether blocks are visible; paired closed-loop reruns
+reporting attack success, task success, and gating fraction, with A/A and
+random-drop controls; exploratory logs, collected in a sandbox, for claims about other gates
+(Prop.~\ref{prop:feedback}, Prop.~\ref{prop:explore}). \emph{Red flag:} closed-loop claims
+from static scores or ungated logs. \emph{Ours:} not evaluated for this gate (our only closed
+loop, with a 3B judge, is descriptive).\\
+\textbf{V} & \textbf{Verdict:} certified at $\delta=.10$ per instruction under unverified
+exchangeability; uncertified under attack; closed loop not evaluated.\\
+\end{tabularx}}
+\end{table}
+
+\paragraph{Limitations}
+The in-context evaluation replays AgentDojo ground-truth traces under two fixed attacks
+for seven hosted judges, not live agent runs (\S\ref{exp:q1}); 24 of the 35 injection goals share
+an attacker identifier (an IBAN, e-mail addresses, URLs), so fewer violations are independent, and
+newer judges may have seen this public benchmark. The closed loop uses one local agent with
+silent drops and no A/A or random-drop controls.
+Black-box attacks, including an optimizing PAIR-style attacker \citep{chao2025pair}, only
+lower-bound margins, and white-box optimization such as GCG \citep{zou2023universal} on
+open-weight judges is not evaluated. Of
+the dedicated classifiers we ran, Llama-Guard-3-8B \citep{inan2023llamaguard}
+misses $.46$ of injections at false block $.10$, dominated by 22 judge runs (B.7), and of two
+prompt-injection detectors one matches the reference judge's ranking but misses $.543$ of the
+goals at its default threshold and the other is at chance (B.21); a T1-style provenance rule
+misses $.212$ of injected calls and blocks $.400$ of clean ones (Supplement~E); CaMeL and Progent were not compared
+(Supplement~D). All experiments are inference-only on public benchmarks, involve no
+human subjects, and target no deployed agent.
+
+\section{Conclusion}
+Five rules follow from the three boundaries. (1)~A gate that cannot retract enforces only
+what it can refute on a finite prefix, so compile oracle-checkable predicates into exact
+gates (T1). (2)~For a one-step exogenous decision, no wrapper, ensemble, or threshold beats the
+likelihood-ratio frontier of its information; a guardrail improves only by changing what it
+sees (T2). (3)~Benign
+calibration is not a security boundary: without a verified margin its certificate gives no
+guarantee under attack, and an adversary that chooses the violation itself voids it (T2).
+(4)~Ungated logs and static scores cannot identify closed-loop behavior; logs with known block
+and allow probabilities can, but their exploratory allows belong in a sandbox and their variance
+can grow exponentially in the horizon (T2). (5)~Keep policy languages inside a decidable
+fragment such as $\Th_0$, so rules can be linted before deployment (T3). A guardrail
+certificate is a statement about an oracle interface, an operating point, a calibration
+population, an adversarial margin, and a feedback model; stated without them, it is not a
+security guarantee.

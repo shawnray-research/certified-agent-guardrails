@@ -1,0 +1,12 @@
+{
+ "judge": "claude-haiku-5-5",
+ "n_flag": 24,
+ "theta": 0.72,
+ "benign_miss": 0.0,
+ "attacked_miss": 0.125,
+ "eta": 0.125,
+ "pushed_below": 3,
+ "rewrites": 144,
+ "refused_rewrites": 0,
+ "errors": 0
+}

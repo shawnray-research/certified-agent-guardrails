@@ -1,0 +1,932 @@
+{
+"source": "AgentDojo v1.2.1 (suite order: workspace, travel, banking, slack; user tasks then injection goals per suite)",
+"items_file": "_bench_texts.json",
+"n_items": 132,
+"n_violations": 35,
+"items": [
+{
+"index": 0,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "eed1939765472de1e9e1f1e7c90b03cf41b52a6c"
+},
+{
+"index": 1,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "99bd76fcf40fe491aa8b160af3c3368fa9a80a52"
+},
+{
+"index": 2,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "f377b3bbf9e50fa99c368bb66160637c8d82043c"
+},
+{
+"index": 3,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "1816bdfe95f001f2282cc495f99267b1b2210ab9"
+},
+{
+"index": 4,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "ab7f150dc3e18f017fa584168ba0b47532aed51d"
+},
+{
+"index": 5,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "c03ba4e1f09ab35b1d475ae5fec03c1380ace3d3"
+},
+{
+"index": 6,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "aa3ab6885f3db0d57c881c372f2cf328994bfea2"
+},
+{
+"index": 7,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "124163ae7f50d7dc45b31d177d4274356758b9bd"
+},
+{
+"index": 8,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "4d3778ec9c7bc284e74c5eea3c374c8ca492adbe"
+},
+{
+"index": 9,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "d0e80f4bb6f69dc4a4a8a5a72d9024dabfa52fb1"
+},
+{
+"index": 10,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "b443b65655e0b8217022fe0ff5eebf91ad72be38"
+},
+{
+"index": 11,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "2057230abe8d0f29d7d9d17caac2ad4aa3684d08"
+},
+{
+"index": 12,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "fd9441c89b3f7a47f6706c47ba59e3a713a666be"
+},
+{
+"index": 13,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "77edb1dae25b7ef1e1ba5924e2685ddf60009ab7"
+},
+{
+"index": 14,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "2da824a773b3ddaa3dd020a8b7702872c5cb6bef"
+},
+{
+"index": 15,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "9bf5a9fcc2e8e666e9be97aed9b1d5525c174d72"
+},
+{
+"index": 16,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "29450cc7c1829126651038cb2a29f94f6f065e82"
+},
+{
+"index": 17,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "1a2ca6af09210e3860cdabd4de0359707bfd6b41"
+},
+{
+"index": 18,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "76748483fa05cc4406043f73e791480da0ad9feb"
+},
+{
+"index": 19,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "102d6e8c015d930af25e92920b39b29cadaf5616"
+},
+{
+"index": 20,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "c81178e2fe4acc7f78d43e6464742fea33c405ec"
+},
+{
+"index": 21,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "f1ce88d99d7147ff0587f260c647df5c9b108c9b"
+},
+{
+"index": 22,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "1d5e3d7228f1b67077c5e9d8daf76a11cc8a931f"
+},
+{
+"index": 23,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "ffd5e5727cd2355c20ac591f38bccebcfd68cab7"
+},
+{
+"index": 24,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "c1c4de16e62d00cfa582bd52224bdeb251038c4d"
+},
+{
+"index": 25,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "8d9cd9c6cdce6f8dab3a761ab0b266f47e7791b1"
+},
+{
+"index": 26,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "545766ac7d664982880697546a51b1f216956c8b"
+},
+{
+"index": 27,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "4991ccc2badc1303acfe407f819a7aee0095d3bb"
+},
+{
+"index": 28,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "931bfcf35bdf5115dfe3cfbdd66d6a741e7708d4"
+},
+{
+"index": 29,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "1e0027bcd8bba61cf359d34922c0cc713c364b38"
+},
+{
+"index": 30,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "c4d3075acb82b52fd3f31054a5f04058bf5b1623"
+},
+{
+"index": 31,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "81aa548d0fea9f0305e28c2ea126d4f080b3b061"
+},
+{
+"index": 32,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "d2e378603cab82bbea05b49dad32425b144468c4"
+},
+{
+"index": 33,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "7a393bd53610c88337c6012615608d3fecc4997b"
+},
+{
+"index": 34,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "0a9e1eb2991d2b64594aa301f93ad4ff3d48f504"
+},
+{
+"index": 35,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "417e5cd77b3f18e3ee3f9284bc4e6995da26156e"
+},
+{
+"index": 36,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "12a60cac5a0252b7b13212ee04db1e5acd3c172c"
+},
+{
+"index": 37,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "14340247e3f123e1002ad4a9971e4da03bc31006"
+},
+{
+"index": 38,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "f5aead845bcb839ada8346a290c2ad0c80db6bc4"
+},
+{
+"index": 39,
+"suite": "workspace",
+"label": 0,
+"kind": "user_task",
+"sha1": "363fc09fbbf09ceaf2d22f571f058d483f9300c5"
+},
+{
+"index": 40,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "318ca1dfa09cd4bf528aa897eb3d1c64fcd9ee8e"
+},
+{
+"index": 41,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "0b51d026a58eded1c4f9853eaadeeb0a779edcb8"
+},
+{
+"index": 42,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "98edb1e47ddf6b5d3b6d37981a3857a2703abd36"
+},
+{
+"index": 43,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "c7daa23d8602a1520a15b1fd03ca6a4ca0436719"
+},
+{
+"index": 44,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "13ab8e13f7dac6b301a26eb9d8b9b137ddd42564"
+},
+{
+"index": 45,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "89b43338a229632f114d439a5f9f26986f295f32"
+},
+{
+"index": 46,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "418dfbf55c6289bf4d811036d49d329e4d4e867f"
+},
+{
+"index": 47,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "26b8fc3935bec48c86ee4905f8b922525a60f534"
+},
+{
+"index": 48,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "1342d31538ab9b4a74d528cf602fcd0835fbdab3"
+},
+{
+"index": 49,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "9f6f5d138a976e108c913347b53bc853712e343c"
+},
+{
+"index": 50,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "e90c2dc61ffecc2ecddd6e393f79f815f0ad67ed"
+},
+{
+"index": 51,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "5988d61e3bdf0acf415a4a9e1a3caff05d449ed7"
+},
+{
+"index": 52,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "ff5893b4cbddb706a7cf03a77fc13dc4694c7065"
+},
+{
+"index": 53,
+"suite": "workspace",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "22fa3c6581ae7f86baba14d7db09f7bf6bfe3be7"
+},
+{
+"index": 54,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "e971e89e4a304635d5a16f369643060c08e6ca31"
+},
+{
+"index": 55,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "8ca36b5334100a7e0b938330e4801aaa17925d29"
+},
+{
+"index": 56,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "b368363b670828287d1668175d40246db26b6848"
+},
+{
+"index": 57,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "1bd8a6ae49af54bc079f3b2a912dfd71ce4c6f38"
+},
+{
+"index": 58,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "02a057062940d463ebb3cf9796e4490d3746a300"
+},
+{
+"index": 59,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "976514396e921018ef0b71ca4941857a6a71ee72"
+},
+{
+"index": 60,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "1c81030453a16c910e0c753be2f516086532f77a"
+},
+{
+"index": 61,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "2b25201f38ca0e2ca3fb48cd3c5ec3d1df24f7ce"
+},
+{
+"index": 62,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "806facc85f07954cf01770c9b67df3d202ddcaee"
+},
+{
+"index": 63,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "1ebf5c87216e289bf628d47cedff06ca4872bffd"
+},
+{
+"index": 64,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "ee15a8f34355cafc2c0ed79dde4eca3671a6c343"
+},
+{
+"index": 65,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "b485cd57be8974752887a916fa359d019ccce442"
+},
+{
+"index": 66,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "4a0043589758836549a7120fa29a22f313376d56"
+},
+{
+"index": 67,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "470b42c823f947cecb652b0819fd02f927b86f69"
+},
+{
+"index": 68,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "52eff65c5bffbb0c7ce5fe188a3bf0b246d65464"
+},
+{
+"index": 69,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "4b723a4ade1c3a4e8fb32e99b0475834bd989205"
+},
+{
+"index": 70,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "dfbb6a42b77d197b7d7b2802c6f4808ac4835d16"
+},
+{
+"index": 71,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "f9335eb190012fbfed662bcd5aa93ff92992f223"
+},
+{
+"index": 72,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "fafdabd982b865ac31aec244abf9faec07db318c"
+},
+{
+"index": 73,
+"suite": "travel",
+"label": 0,
+"kind": "user_task",
+"sha1": "3733252964daca57bac2bd17aaf30d7d62577660"
+},
+{
+"index": 74,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "95f00ae865fab1eac3a86607af7a4d3c7a935f22"
+},
+{
+"index": 75,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "49994d8989b7ccbaf1024401a53e79e44728a6e6"
+},
+{
+"index": 76,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "9c1397bcc6bdfea26579ca2be158f16de0df452b"
+},
+{
+"index": 77,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "c0b89ce962567c669996730a6bb5813b7088721e"
+},
+{
+"index": 78,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "a05e9d82a767be4fcd59685b0fc5af5f072fa618"
+},
+{
+"index": 79,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "e0dc3c2a5a272554c6dcd467fa1205adb3de2604"
+},
+{
+"index": 80,
+"suite": "travel",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "d0318c6afce6c9f5392aa7616b552743edb16215"
+},
+{
+"index": 81,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "4edb7b1547d6f81d26872afcba051d0627ed00e6"
+},
+{
+"index": 82,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "58c3233804ceae36d7832b25115151bfcbf20430"
+},
+{
+"index": 83,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "05efa87784900aff8cb0f7f929b2d9039ae34a70"
+},
+{
+"index": 84,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "e85cfe0ac44539ced960026d2e2057b7a47504ed"
+},
+{
+"index": 85,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "e68e221884fad865111c60e105e907def1912f80"
+},
+{
+"index": 86,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "cd53a1343dcad961b3da1d3c777a1b1a70320bd5"
+},
+{
+"index": 87,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "030befb2a873f62b590c63e8a6d87482875d84f3"
+},
+{
+"index": 88,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "6ca45e7d3536571f2c561fac5df594d36db11033"
+},
+{
+"index": 89,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "7d05fb6ac7c61e644e1cc3bf43be510f520e3f5b"
+},
+{
+"index": 90,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "0d71ac099f1b1409cd910129c183434345d28e89"
+},
+{
+"index": 91,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "9456832dabb4c106796f067217ad684d74df28ca"
+},
+{
+"index": 92,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "3143ffbc3f1d11b2dc9efde08e82bb7e5edf9949"
+},
+{
+"index": 93,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "4ae4a86b8f283608701efcdadcd7e3ceac1d5fc4"
+},
+{
+"index": 94,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "8984e6797af145fea4da49f43994215f831a8cf9"
+},
+{
+"index": 95,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "d8be62db520571b28c0147908b348d302a33277e"
+},
+{
+"index": 96,
+"suite": "banking",
+"label": 0,
+"kind": "user_task",
+"sha1": "7bf2271c3d36b493052c2920e27d8e92ff8e3ac6"
+},
+{
+"index": 97,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "79e23d894de86fcc242cbb68a361435912c7fa08"
+},
+{
+"index": 98,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "afc8bb57546a2caf2b512f8f466d76bf8e142106"
+},
+{
+"index": 99,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "194013db47ac827ce6c859782aee999db78786eb"
+},
+{
+"index": 100,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "9ddd576c65e7121bf4be4964758b01fa45f92fbb"
+},
+{
+"index": 101,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "5699cfe8da94ba163602a8ec8aba03d25069735b"
+},
+{
+"index": 102,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "d9a3f25f870a50b58b060aeb55a2a5144ace7045"
+},
+{
+"index": 103,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "e51a36036dc13c1b36431aa8293ec978941852bf"
+},
+{
+"index": 104,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "d1e5ba09d0175842317ce80717283c980ff36a1d"
+},
+{
+"index": 105,
+"suite": "banking",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "64e9cb8dca22cb7fb15b4b02867eab0429aabafb"
+},
+{
+"index": 106,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "074c24e66c4f90db2c382448b77bb83fbaf12656"
+},
+{
+"index": 107,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "047dc1c64755bf91fb72bdf253e871cf6cf976c4"
+},
+{
+"index": 108,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "7810e0a1de87fd97094f17f8afb18fd55f706626"
+},
+{
+"index": 109,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "ce03296f5e5a534a162b5cf1c62446d660b672a1"
+},
+{
+"index": 110,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "0e8355448ab799b8178e0398c48f0c7c9e75d64c"
+},
+{
+"index": 111,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "bb2d4861071b8c800cca1a7eafafc73f0ae645f1"
+},
+{
+"index": 112,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "9f75de69384465741b4a6358bdb4c641d66762d3"
+},
+{
+"index": 113,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "253e3da72cf5b66973a479a9ffa1be0edf9297dd"
+},
+{
+"index": 114,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "089b90b0d9ea4d53c91595146a598fbd5f3b1565"
+},
+{
+"index": 115,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "148e1d6f1ae9129008bc540d2a837c798004fee0"
+},
+{
+"index": 116,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "d9875f584e6601f70cca4cb8fe663b9ce203f153"
+},
+{
+"index": 117,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "72da768715cd32cb3c3c7fab3efda277f5ed8b39"
+},
+{
+"index": 118,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "db4bdd108a2baa3e6f2c6b5fea89e1a5191dc12d"
+},
+{
+"index": 119,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "ff8c42dbe4ff1de0595a4663303635e03389ac4e"
+},
+{
+"index": 120,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "e2d2710aec70daf4aeb5e45bce0bce79feb1604b"
+},
+{
+"index": 121,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "261b61bb96b6a4743849dad2f3c8fa6aaa0e0a18"
+},
+{
+"index": 122,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "245a0b0642248ea68784634366d8ef06323d39e8"
+},
+{
+"index": 123,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "fad0ea788985e8daced386ea16af543a11073f7f"
+},
+{
+"index": 124,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "2a3911b545d2d8d288a9717a5a9a216ac293424d"
+},
+{
+"index": 125,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "fd7af8c9ff6fe56cea4fdee537d5fdc1e29c100f"
+},
+{
+"index": 126,
+"suite": "slack",
+"label": 0,
+"kind": "user_task",
+"sha1": "df9f79e0d1e5053736b04011930b6b111ae55da6"
+},
+{
+"index": 127,
+"suite": "slack",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "def927ca79a12b60f120902a6a2f0d50948eb5a6"
+},
+{
+"index": 128,
+"suite": "slack",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "3163e36528642e6b088e6528e44b53f2ca66c88a"
+},
+{
+"index": 129,
+"suite": "slack",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "8f5bb30a4ba68419cab76239a14b0370aba70546"
+},
+{
+"index": 130,
+"suite": "slack",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "7b6be1a836d293831c23ec9f749fe548f89aa8f2"
+},
+{
+"index": 131,
+"suite": "slack",
+"label": 1,
+"kind": "injection_goal",
+"sha1": "8b91605c17d465687f376de89ba27dfe7d8ac5cb"
+}
+]
+}

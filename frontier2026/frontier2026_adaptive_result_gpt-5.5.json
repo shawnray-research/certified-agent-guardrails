@@ -1,0 +1,12 @@
+{
+ "judge": "gpt-5.5",
+ "n_flag": 30,
+ "theta": 0.8,
+ "benign_miss": 0.06666666666666667,
+ "attacked_miss": 0.26666666666666666,
+ "eta": 0.2,
+ "pushed_below": 8,
+ "rewrites": 180,
+ "refused_rewrites": 0,
+ "errors": 0
+}

@@ -1,0 +1,60 @@
+%% IEEE Transactions on Dependable and Secure Computing -- regular paper submission.
+%% Build: pdflatex main && bibtex main && pdflatex main && pdflatex main
+\documentclass[10pt,journal,compsoc]{IEEEtran}
+\input{preamble}
+% Public artifact (code, cached judge scores); complete proofs and extended experiments are in
+% the separately submitted supplementary material (supplement.tex).
+\newcommand{\artifactURL}{\url{https://github.com/shawnray-research/certified-agent-guardrails/tree/tdsc}}
+
+\hypersetup{pdftitle={What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents},
+  pdfauthor={Shawn Ray},
+  pdfkeywords={AI agent security, runtime enforcement, guardrails, prompt injection, security automata, conformal risk control, large language models}}
+\begin{document}
+\bstctlcite{IEEEexample:BSTcontrol}
+\title{What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents}
+\author{Shawn~Ray%
+\IEEEcompsocitemizethanks{\IEEEcompsocthanksitem S.~Ray is with Carnegie Mellon University,
+Pittsburgh, PA 15213, USA.\protect\\
+E-mail: shawnray@cmu.edu\protect\\
+An earlier version of this work is available as arXiv:2607.22868.}}
+\markboth{IEEE Transactions on Dependable and Secure Computing}%
+{Ray: What Can Be Enforced? Limits of Runtime Guardrails for Tool-Using LLM Agents}
+
+\IEEEtitleabstractindextext{%
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+\begin{IEEEkeywords}
+AI agent security, runtime enforcement, guardrails, prompt injection, security automata,
+conformal risk control, large language models.
+\end{IEEEkeywords}}
+
+\maketitle
+\IEEEdisplaynontitleabstractindextext
+\IEEEpeerreviewmaketitle
+
+\input{sections/intro}
+\input{sections/threat}
+\input{sections/model}
+\input{sections/t1}
+\input{sections/t2}
+\input{sections/t3}
+\input{sections/experiments}
+\input{sections/related}
+\input{sections/discussion}
+
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+\bibliographystyle{IEEEtranN}
+\bibliography{refs}
+
+% Keep the short biography in one piece (it must not split across columns).
+\noindent\begin{minipage}{\columnwidth}
+\begin{IEEEbiographynophoto}{Shawn Ray}
+is with Carnegie Mellon University, Pittsburgh, PA, USA. Research interests include runtime
+enforcement and the security of tool-using AI agents.
+\end{IEEEbiographynophoto}
+\end{minipage}
+\end{document}

@@ -1,0 +1,274 @@
+\section{\texorpdfstring{T2: The Statistical and Security\\Boundaries (Fallible Judge)}{T2: The Statistical and Security Boundaries (Fallible Judge)}}\label{sec:t2}
+
+T2 asks what a gate can guarantee when semantic predicates are evaluated by a
+fallible judge (Def.~\ref{def:judge}). For the exogenous binary decision the ROC
+is the exact object (\S\ref{t2:exogenous}); in the closed loop, where blocking
+changes what the agent proposes next, it is not (\S\ref{t2:feedback}). We then
+turn the exogenous frontier into a finite-sample certificate
+(\S\ref{t2:certificate}) and bound what survives an adversary who controls the
+judge's view of an action (\S\ref{t2:adversarial}). Full proofs are in
+Supplement~A.3.
+
+\begin{assumption}[Benign calibration regime]\label{ass:benign}
+One binary predicate labels a proposal violating iff its commit leaves $\Good(P)$; the gate is block-only; and violating calibration examples are label-conditionally
+exchangeable with violating deployment proposals. The product-episode specialization
+additionally assumes i.i.d.\ labels and conditionally i.i.d.\ information across steps,
+and a stationary rule with fresh per-step randomization.
+\end{assumption}
+\noindent Judged predicates enter the gate only as stateless conjuncts of its block rule; judged bits
+that update automaton state are out of scope.
+
+\subsection{The Exogenous Frontier}\label{t2:exogenous}
+
+Fix a single pre-commit decision and let $I$ be the information the gate sees
+before it decides (e.g., one or several judge scores). The gate cannot influence
+the law of $I$, so choosing a block rule is a two-class testing problem.
+
+\begin{proposition}[Exogenous information frontier; Neyman--Pearson and Blackwell, restated]\label{thm:frontier}
+Fix a one-step law for the violation label and any pre-commit information $I$ whose
+law does not depend on the gate. Write $\ROC_I(\beta)$ for the minimum false-block
+probability among all randomized $I$-measurable rules with violation-miss probability
+at most $\beta$. Then the exact safety--utility frontier is
+\[
+  B_I^\star(\beta)=\ROC_I(\beta),
+\]
+where $B_I^\star(\beta)$ is the minimum utility loss $U$ (Def.~\ref{def:gate}) of a
+block-only gate that decides from $I$, possibly with external randomization, at miss at
+most $\beta$,
+attained by a randomized likelihood-ratio test (by a threshold on a score $s$,
+randomized on ties, when that ratio is a nondecreasing function of $s$). No rule, ensemble, or wrapper using the \emph{same}
+$I$ lies below this frontier. If $I'$ refines $I$ (so $I$ is a garbling of $I'$),
+then $\ROC_{I'}(\beta)\le\ROC_I(\beta)$ pointwise. The two frontiers coincide at
+every $\beta$ whenever the likelihood ratio of $I'$ is almost surely a function of $I$
+(then $I$ is sufficient for the label), so conditional dependence among judges alone
+does not guarantee a gain.
+\end{proposition}
+
+\noindent The proof is the Neyman--Pearson lemma \citep{neyman1933problem,tong2018np} with
+Blackwell's garbling order \citep{blackwell1953equivalent} (Supplement~A.3): a guardrail can
+improve on a judge only by changing the information it decides on.
+
+\begin{corollary}[Continuation-neutral episode lift]\label{cor:reduction}
+Under the product specialization of Assumption~\ref{ass:benign}, restrict the gate
+to applying one stationary $I$-measurable test independently at each step. If every
+step is violating, $R_H(\beta)=1-(1-\beta)^H$; if labels are i.i.d.\
+$\mathrm{Bernoulli}(q)$, $R_H(\beta)=1-(1-q\beta)^H$. Within this product class,
+\[
+ B_{I,H}^\star(\delta)=\ROC_I\!\left(R_H^{-1}(\delta)\right),
+\]
+where $B_{I,H}^\star$ is the minimum per-step false-block probability and
+$R_H^{-1}(\delta)=\max\{\beta\in[0,1]:R_H(\beta)\le\delta\}$ (so allow-all once $\delta\ge R_H(1)$).
+This lift does \emph{not} cover history-dependent rules (which can do
+strictly better even without feedback), shared episode-level randomization, or
+feedback from decisions into future proposals; open-loop time-varying rules cannot beat it
+(Supplement~A.3).
+\end{corollary}
+
+
+\subsection{Feedback: The Closed-Loop Frontier}\label{t2:feedback}
+
+Corollary~\ref{cor:reduction} assumes that a block changes neither what the
+agent proposes next nor how later proposals are labeled and scored. A tool-using agent sees a block and may respond (e.g., by
+retrying), so we model the gate as the controller of a finite partially
+observed process.
+
+\begin{definition}[Controlled episode frontier]\label{def:controlled}
+For a finite horizon and finite abstraction, let $X_t$ contain the environment,
+agent memory, policy state, and an absorbing unsafe bit. From its perfect-recall
+history $h_t$ (including proposal and score), the gate chooses
+$D_t\in\{\allow,\block\}$; the kernel for $X_{t+1}$ and the next observation (appended to $h_t$) may depend on
+$D_t$, and depends on the past only through $(X_t,D_t)$.
+For bounded additive cost $c_t$ and first-entry unsafe cost $r_t$, both functions of
+$(X_t,D_t,X_{t+1})$ (the current proposal is part of $X_t$), define
+$C(\psi)=\E_\psi\sum_t c_t$, $R(\psi)=\E_\psi\sum_t r_t$, and
+$F_H(\delta)=\inf_{\psi:R(\psi)\le\delta}C(\psi)$ over randomized perfect-recall policies.
+\end{definition}
+Here the gate observes its full history $h_t$, including blocked proposals and past
+scores, which extends the observation model of Definition~\ref{def:gate}; T1 is
+unaffected because its arguments use only block-free streams.
+
+\begin{theorem}[Endogenous finite-model frontier; CPOMDP occupancy, instantiated]\label{thm:sequential}
+For a specified finite controlled model in Definition~\ref{def:controlled},
+every history-dependent policy has an equivalent
+belief-Markov policy. Reachable-belief occupancy measures form a finite polytope, and
+\[
+\begin{aligned}
+F_H(\delta)=\min_{\zeta\in\mathcal M}\quad
+  &\sum_{t,b,d}\zeta_t(b,d)c_t(b,d)\\[-2pt]
+\text{s.t.}\quad
+  &\sum_{t,b,d}\zeta_t(b,d)r_t(b,d)\le\delta ,
+\end{aligned}
+\]
+where $b_t=\Pdist(X_t\mid h_t)$, $c_t(b,d)=\E[c_t\mid b_t=b,D_t=d]$, $r_t(b,d)$ likewise, and $\mathcal M$ is the set of
+nonnegative occupancy measures over reachable beliefs that satisfy the flow constraints of
+Supplement~A.3. Thus the achievable $(R,C)$ set is compact and convex and $F_H$ is nonincreasing,
+convex, and piecewise linear where finite. Strong duality reduces each supporting point to a
+belief-state Bellman recursion $V_t^\lambda$ with stage cost $c_t+\lambda r_t$ (Supplement~A.3),
+and, whenever the risk constraint is feasible, an optimum is implemented by
+sampling once per episode from at most two deterministic belief-Markov
+policies \citep{walraven2018cpomdp}.
+\end{theorem}
+
+\noindent\emph{Proof idea.} Finitely many beliefs are reachable and the belief is a sufficient
+controlled state; occupancy measures form a polytope on which $R$ and $C$ are linear
+\citep{altman1999constrained}, and LP duality yields the recursion (Supplement~A.3).
+
+The optimal rule blocks only when the immediate gain from blocking covers the future cost the block
+causes (e.g., a retry that must itself be blocked), so the one-step ROC governs it only where that
+continuation gap vanishes, as at $t=H$ (Supplement~A.3).
+
+\begin{proposition}[ROC does not identify a feedback frontier]\label{prop:feedback}
+Two $H=2$ systems can have identical judge ROC and identical ungated trajectory law
+but different $F_H(0)$ (minimum intervention cost at zero episode-unsafe rate):
+after a first-step block, system A stays compliant whereas system B proposes
+a fresh violation with positive probability. Hence closed-loop performance requires the controlled response
+to intervention, not the ungated ROC alone.
+\end{proposition}
+
+\noindent\emph{Construction.} Take a constant judge score and a first proposal that violates
+with probability $q\in(0,1)$. After an allow, both systems propose a compliant action, so ungated
+laws and ROCs coincide; after a block, A proposes a compliant action whereas B proposes one that
+violates with probability $p\in(0,1)$. Zero risk forces blocking, so
+$F_A(0)=1-q<(1-q)+(1-p)=F_B(0)$; the gap persists for every judge whose score laws are not
+mutually singular (Supplement~A.3).
+\begin{corollary}[Identification impossibility]\label{cor:no-estimator}
+Over any model class containing the two systems in
+Proposition~\ref{prop:feedback}, no estimator whose input is limited to ungated
+trajectories and static judge scores can uniformly identify $F_H(0)$, hence
+cannot identify the full controlled frontier.
+\end{corollary}
+
+The estimator's input law is the same in A and B, but the targets differ: this is the overlap
+(positivity) failure of off-policy evaluation
+\citep{robins1986new,murphy2003optimal,precup2000eligibility}, since ungated logs never exercise a
+block, and reruns of one fixed non-exploring gate identify only its own outcomes. Exploration restores
+identification, at a price that grows with the horizon.
+
+\begin{proposition}[Exploratory blocking restores identification]\label{prop:explore}
+In the model of Definition~\ref{def:controlled}, let a logging gate choose $D_t$ from $h_t$ with
+known probabilities $\mu(d\mid h_t)\ge\varepsilon>0$ for both decisions at every reachable
+history, and let the logs record $(h_t,D_t,c_t,r_t)$ at every step (for $c_t$, this includes the
+ground-truth label of a blocked proposal). Then for every randomized perfect-recall gate $\psi$,
+with $W_t=\prod_{s\le t}\psi(D_s\mid h_s)/\mu(D_s\mid h_s)$,
+\[
+  R(\psi)=\E_\mu\Big[\sum_{t}W_t\,r_t\Big],\qquad C(\psi)=\E_\mu\Big[\sum_{t}W_t\,c_t\Big],
+\]
+so the achievable $(R,C)$ set and $F_H(\delta)$ are identified from the logging law. Since
+$W_t\le\varepsilon^{-t}$, the importance-weighted estimator is unbiased but its variance can grow
+exponentially in $H$.
+\end{proposition}
+
+\noindent\emph{Proof idea.} The trajectory law factorizes into the gate's decision
+probabilities and gate-independent conditional laws, so per-decision importance sampling
+\citep{precup2000eligibility} applies wherever $\mu$ is positive (Supplement~A.3). Ungated logs
+have $\mu(\block\mid h)=0$, exactly the failure in Corollary~\ref{cor:no-estimator}: a gate's
+frontier is identified from logs once the logging gate sometimes blocks and sometimes allows at
+every history the evaluated gates can reach; exploratory allows of flagged proposals must therefore run
+in a sandbox or shadow deployment, never against real irreversible effects.
+
+\subsection{A Distribution-Free Certificate}\label{t2:certificate}
+
+The frontiers above are population objects; a deployment needs a guarantee
+for the threshold it selects from finite data.
+
+\begin{theorem}[Distribution-free safety certificate; conformal risk control, instantiated]\label{thm:conformal}
+Under Assumption~\ref{ass:benign}, calibrating the threshold by conformal risk
+control, on violating calibration examples, to hold the per-step conditional miss
+risk $\Pdist[\allow\mid\text{violation}]$ at $\delta/H$ yields
+$\Pdist[\text{unsafe episode}]\le\delta$, marginally over deployment episodes and the
+calibration draw, finite-sample and distribution-free under per-step
+exchangeability. The theorem certifies risk, not proximity to the population ROC
+frontier; finite calibration can select a conservative or block-all threshold.
+\end{theorem}
+
+\noindent\emph{Proof idea.} Conformal risk control \citep{angelopoulos2024conformal} bounds
+each step's conditional miss by $\delta/H$, and a union bound over the $H$ steps gives $\delta$
+(Supplement~A.3); a guarantee conditional on one calibration set needs more violations
+\citep{vovk2012conditional}.
+
+\begin{remark}[On the assumptions]\label{rem:assumptions}
+Exchangeability is label-conditional and per deployment proposal, not a within-episode
+independence claim. Assumption~\ref{ass:benign} is an open-loop condition: once decisions
+change later proposals, their labels, or the judge's inputs, their law depends on $\hat\theta$,
+so it must be checked for the gated loop itself (feedback is absent at $H=1$ or for an exogenous
+proposal stream with history-free, action-local scoring); our closed-loop study (\S\ref{exp:q4}) does
+not claim it.
+\end{remark}
+
+The factor $H$ comes only from the union bound: under a stronger, open-loop episode
+exchangeability, calibrating on the episode loss removes it, and the gate that blocks when any of
+$m$ judges flags has sharp Fr\'echet--Hoeffding error bounds (Supplement~A.3).
+
+\subsection{Adversarial Deployment}\label{t2:adversarial}
+
+An attacker who can write into the judge's input breaks the certificate's
+exchangeability without changing what the action does. We bound the damage by
+a representation margin.
+
+\begin{definition}[Budget-$\rho$ adversary; robustness margin]\label{def:adversary}
+Let the judge score its input $z=J(\tau,o,a)$ (not just $(\tau,a)$), where $o$ is untrusted context
+the judge reads (e.g., tool outputs) that is not part of the committed effect history $\tau$. A
+\emph{budget-$\rho$ adversary} knows the scoring function and threshold and may
+replace $z$ by $z'$ with $d(z,z')\le\rho$ (for example, inserting at most $\rho$
+tokens into a tool-output field), adaptively across steps. The executable proposal
+$a$, its effect, and its ground-truth label $\pi(\tau,a)$ are unchanged. At
+threshold $\theta$, $\eta(\rho;\theta)$ is the supremal increase, over such
+representation perturbations, in conditional violation-miss probability;
+$\bar\eta(\rho)=\sup_\theta\eta(\rho;\theta)$. Suprema need not be attained on an
+infinite perturbation set.
+\end{definition}
+
+The uniform margin $\bar\eta(\rho)$ is the relevant quantity for a calibrated
+gate, whose threshold $\hat\theta$ is itself random.
+
+\begin{theorem}[Adversarial deployment bound]\label{thm:adv}
+Under Assumption~\ref{ass:benign}, calibrate on benign violations as in
+Theorem~\ref{thm:conformal}, then let a budget-$\rho$ adversary act only at
+deployment, on steps drawn independently of the calibration sample; the violating
+proposals generated under attack (before perturbation) must still satisfy
+Assumption~\ref{ass:benign}, e.g., for an exogenous proposal stream with action-local labels and
+history-free judge inputs (otherwise forcing
+blocks of compliant proposals can steer the agent into uncalibrated violations that
+$\eta$ does not measure). The
+calibrated gate satisfies
+\[
+\Pdist[\text{unsafe episode}]\le\min\{1,\delta+H\bar\eta(\rho)\}
+\]
+marginally over the calibration draw. At a fixed threshold $\theta$, an
+attained-margin, independent all-violation product construction has risk
+$1-(1-\min\{1,\beta(\theta)+\eta(\rho;\theta)\})^H$.
+\end{theorem}
+
+\noindent\emph{Proof idea.} Calibration sees only benign data, so
+the benign per-step miss at $\hat\theta$ is still at most $\delta/H$ in expectation; $\bar\eta(\rho)$ bounds the
+increase at every threshold, and the union bound gives the claim (Supplement~A.3).
+
+\begin{proposition}[Distributional zero-miss price]\label{prop:zero-miss}
+Let $Q_\rho$ be an attainable adversarial violation-score law and $F_0$ the
+compliant score law. Every score-measurable zero-$Q_\rho$-miss gate obeys
+\[
+U\ge1-\sup\{F_0(N):Q_\rho(N)=0\}.
+\]
+In particular, $F_0\ll Q_\rho$ implies $U=1$ for distributional zero miss.
+\end{proposition}
+
+\begin{corollary}[Robust calibration restores the certificate, at an ROC price]
+\label{cor:robust}
+If a uniform margin $\bar\eta(\rho)<\delta/H$ has been verified, calibrating on
+benign exchangeable violations to the tightened per-step target
+$\delta/H-\bar\eta(\rho)$ (not $\delta/H$) restores
+$\Pdist[\text{unsafe episode}]\le\delta$ (marginal over the calibration draw) against any
+budget-$\rho$ representation adversary at deployment, under the conditions of
+Theorem~\ref{thm:adv}, at an added population false-block cost of
+$\ROC_I(\delta/H-\bar\eta(\rho))-\ROC_I(\delta/H)$.
+\end{corollary}
+
+Naive benign calibration is therefore not a security boundary: its guarantee
+degrades to $\delta+H\bar\eta(\rho)$ and is vacuous once that reaches one.
+Margin-aware calibration would be a security boundary against budget-$\rho$ rewrites under Assumption~\ref{ass:benign},
+provided a uniform margin $\bar\eta(\rho)<\delta/H$ is verified at every threshold
+calibration might select, e.g., by a certified defense against insertions of up to $\rho$ tokens
+\citep{kumar2024certifying}.
+
+A measured attack only lower-bounds $\eta(\rho;\theta)$, and hence $\bar\eta(\rho)$; it can falsify the
+precondition of Corollary~\ref{cor:robust} (\S\ref{exp:q3}) but never verify it.

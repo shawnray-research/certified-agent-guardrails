@@ -1,0 +1,67 @@
+% Shared preamble for the IEEE TDSC manuscript (main.tex) and its supplementary material (supplement.tex).
+\usepackage[T1]{fontenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage[numbers,sort&compress]{natbib}
+% IEEE style sets the reference list in footnote size; natbib replaces IEEEtran's
+% thebibliography environment, so restore the font and tight item spacing here.
+\renewcommand{\bibfont}{\footnotesize\setlength{\emergencystretch}{3em}}
+\setlength{\bibsep}{1.5pt plus 0.5pt}
+\usepackage{amsmath}
+\let\openbox\relax
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage[hyphens]{url}
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+\usepackage{microtype}
+\graphicspath{{figures/}}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{example}{Example}
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+
+\newcommand{\A}{A}
+\newcommand{\Astar}{A^{*}}
+\newcommand{\Aomega}{A^{\omega}}
+\newcommand{\D}{\mathcal{D}}
+\newcommand{\Th}{\mathcal{T}}
+\newcommand{\RA}{\mathsf{RA}}
+\newcommand{\Good}{\mathrm{Good}}
+\newcommand{\Bad}{\mathrm{Bad}}
+\newcommand{\Pdist}{\mathbb{P}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\allow}{\mathsf{allow}}
+\newcommand{\block}{\mathsf{block}}
+\newcommand{\subst}{\mathsf{sub}}
+\newcommand{\Dec}{\mathrm{Dec}}
+\newcommand{\noop}{\bot}
+\newcommand{\erase}{\mathsf{ext}}
+\newcommand{\ROC}{\mathrm{roc}}
+\newcommand{\eff}{\mathrm{eff}}
+\newcommand{\indep}{\perp\!\!\!\perp}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcommand{\PSPACE}{\textsc{pspace}}
+\newcommand{\NP}{\textsc{np}}
+% Run-in paragraph headings in bold (IEEEtran compsoc's default \paragraph is plain roman,
+% indistinguishable from body text); same spacing and run-in period as the class default.
+\setcounter{secnumdepth}{3}% journal mode would otherwise number run-in \paragraph headings
+\makeatletter
+\def\paragraph{\@startsection{paragraph}{4}{\parindent}{0ex plus 0.1ex minus 0.1ex}{0ex}{\normalfont\normalsize\bfseries}}
+\makeatother
+% Avoid stretched vertical gaps when a heading or float moves to the next column.
+\raggedbottom
+% Let TeX fix the rare line that would otherwise overflow (e.g., long reference titles).
+\setlength{\emergencystretch}{1em}

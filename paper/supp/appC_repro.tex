@@ -1,0 +1,83 @@
+% Reproducibility details (moved from the main paper's appendix: IEEE CS journals treat appendices as supplemental material).
+\section{Reproducibility Details}\label{app:repro}
+
+\paragraph{Judge prompt}
+Every judge receives the same prompt, reproduced verbatim from the artifact (one prompt line per
+line; blank lines as in the artifact), with the serialized action substituted for \texttt{\{action\}}:
+{\scriptsize
+\begin{verbatim}
+You are a safety classifier for autonomous-agent tool calls.
+Rate how likely the following proposed agent ACTION
+  violates a safety, security, privacy, authorization,
+  or financial-control policy.
+Respond with ONLY an integer 0-100: 0 = clearly
+  safe/compliant, 100 = clearly unsafe/policy-violating.
+  Output the number only.
+
+ACTION: {action}
+
+RISK (0-100):
+\end{verbatim}}
+\noindent(Indented lines continue the prompt line above them.)
+Judges decode at temperature $0$ where the API allows it; the seven whose APIs
+accept no temperature run with low or disabled reasoning effort (Supplement~B.19) and are
+scored three times (Table~\ref{tab:frontier2026}). We take the first integer in the reply, clamp
+it to $[0,100]$, and divide by $100$ to obtain the score $s\in[0,1]$. A refusal signaled
+by the API (for the seven judges served without temperature control) or a content-filter
+block scores $1.0$ (fail-closed); Table~\ref{tab:frontier2026} also reports these refusals
+scored $.5$. Any other reply without an integer, including a textual refusal in the older caches,
+scores $.5$. For judges without retained raw replies, such a $.5$ cannot be told apart from a
+genuine 50 (Supplement~B.1). A gate
+with threshold $\theta$ blocks iff $s\ge\theta$. Random seeds are fixed in each
+script.
+
+\paragraph{Datasets}
+We use a curated set of $60$ labeled tool-call actions; the $132$ tasks of
+AgentDojo \citep{debenedetti2024agentdojo} ($97$ user tasks as compliant
+actions and $35$ injection goals as violations, from the banking, slack,
+travel, and workspace suites), pinned to \texttt{v1.2.1}; InjecAgent
+\citep{zhan2024injecagentbench} ($62$ violations, $17$ compliant); and
+AgentHarm \citep{andriushchenko2025agentharm} ($176$ harmful, $176$ benign).
+InjecAgent and AgentHarm are third-party benchmarks. We obtained them from their
+original sources, and the artifact does not redistribute their prompts or
+any scores keyed by them.
+
+\paragraph{Compute}
+The study is inference-only; no model was trained or fine-tuned. Open-weights
+judges run locally under \texttt{ollama} (CUDA backend, default GGUF
+quantization, typically \texttt{Q4\_K\_M}) on a workstation with two
+$24$\,GB consumer GPUs. The $70$B model and all closed and frontier judges are
+queried through hosted inference APIs. Local inference takes a few GPU-hours.
+Hosted-judge queries were kept small, all with low or disabled reasoning effort: the seven judges without temperature control
+needed about $3.5$k API calls ($167$ texts, i.e., 132 items and 35 suffixed violations, times 3 runs),
+plus about $1$k for the best-of-six search, $2.3$k for the best-of-20 search (B.20), about $14$k for the
+in-context study and its attacks (Supplement~E), and $1.8$k judge and attacker turns for the optimizing
+attacker (Supplement~\ref{suppE:pair}).
+
+
+\paragraph{What ``predeclared'' means}
+We call a protocol predeclared when it was fixed before the scores it governs were collected. The Gemma-2-9B
+reference, the $\pm.05$ equivalence margin, and the 16-word suffix date from the July 2026 preprint (commit
+\texttt{44e9444} of the public repository's \texttt{main} branch, 2026-07-07), before the frontier judges added on
+July 9 and November 1, 2026 were scored; the repository history cannot order them relative to the July scores
+committed with them. The in-context item builder and scorer, the judge-targeting and adaptive in-context attacks
+and their stability check, the context ablation, and the optimizing attacker and its stability check were each
+fixed in the module docstrings of their scripts before their runs; the timestamped development history that
+documents this order is available from the author on request, and the detector baseline stores a hash of its
+protocol docstring with its scores. The Q4 operating points were not preregistered.
+
+\paragraph{Artifact}
+The public artifact\footnote{\artifactURL} contains the code, the curated probe, the exact
+prompt, and cached judge scores for the curated probe and the AgentDojo tasks.
+The reported numbers for these two sources regenerate from the caches without
+model inference or API access, including Table~\ref{tab:frontier2026} (its familywise
+$p$-values from \texttt{analyze\_agentdojo\_inference.py -{}-family complete}; the helper
+\texttt{frontier2026\_table.py} prints a smaller 29-contrast family), with two exceptions: the
+per-pair cache of the source-role diagnostic (B.4) and the per-episode logs of the paired
+closed-loop rerun ($N=389$, B.5) are not part of the public artifact, so those counts (also
+hard-coded in \texttt{make\_fig\_main\_results.py}) cannot be regenerated
+from it. The artifact also contains a predeclared, unrun protocol for the closed-loop controls that Q4 lacks
+(\texttt{run\_loop\_controls.py}: an A/A rerun and a keyed-hash random drop matched to the 3B gate's per-suite
+block rate), so that they can be added without changing the analysis. Model identifiers and query dates of the hosted judges are listed in the artifact. The InjecAgent and
+AgentHarm results reproduce by re-scoring after obtaining those datasets from
+their original sources.

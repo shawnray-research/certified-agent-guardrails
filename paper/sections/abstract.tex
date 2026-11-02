@@ -1,0 +1,15 @@
+LLM agents rely on runtime guardrails, judge-driven gates before irreversible tool calls, against
+prompt injection, yet evaluations report violation rates, not what gates enforce or certify. We
+delimit three boundaries. Expressiveness: relative to oracle predicates, a non-retracting gate enforces
+exactly the nonempty safety policies whose good prefixes its register automaton recognizes, below edit automata.
+Statistics: Neyman--Pearson gives the exact miss/false-block frontier of the gate's information and
+conformal risk control a finite-sample certificate; judge-input rewrites add a robustness margin, and
+choosing the violation voids both; once blocks change later proposals, only exploratory logs identify the
+closed-loop frontier. Decidability: whether a policy can fire is undecidable with two zero-testable
+counters, PSPACE-complete for a keyed-counter fragment, and NP-complete for caps, quotas, and
+revocation. On AgentDojo, deterministic gates calibrated on 17--18 instruction-string violations to a
+10\% miss target block at least 64\% of compliant instructions; given the user request and tool outputs
+of replayed traces, hosted judges separate injected from compliant calls in the same context (AUC
+.87--1.00) and block at most 16\% of the latter, yet rewriting injected text evades them on up to
+12\% of flagged calls. Certificates must state the oracle interface, operating point, calibration
+population, adversarial margin, and feedback model.

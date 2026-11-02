@@ -1,0 +1,58 @@
+\section{System and Threat Model}\label{sec:threat}
+
+\paragraph{System and trusted computing base}
+An agent acts for a user by proposing tool calls one at a time. A pre-execution gate sees
+the committed effect history, the proposed action $a$, and the scores of $m$ judges, and
+returns $\allow$, $\block$, or $\subst(a')$ before the action commits
+(Def.~\ref{def:gate}). Commits are irreversible; blocking commits the no-op $\noop$, which
+has no external effect. The agent may observe a block and change its later proposals; T1 abstracts
+this feedback away and T2 models it as a decision-dependent kernel
+(Def.~\ref{def:controlled}). The TCB consists of the gate code, its policy automaton, the
+oracle predicate bits $\Pi$ when available, and trusted metadata (in the running example, a
+trusted clock adapter for P2's day bucket and provenance labels that grant authority only to
+user input). The agent is outside the TCB, so T1 quantifies over every proposal stream; the
+judge is a black-box test with false-alarm rate $\alpha$ and miss rate $\beta$
+(Def.~\ref{def:judge}). In the terminology of \citet{avizienis2004basic}, injected content
+and judge errors are faults, a violating proposal that reaches the gate is an error, a
+violating committed effect is a failure, and a false block is an omission failure.
+
+\paragraph{Adversary}
+The adversary controls untrusted content the agent reads (tool outputs, documents, email)
+and uses it for indirect prompt injection \citep{greshake2023injection}. It has three
+capabilities. (i)~\emph{Injection:} it chooses the injected content, and hence which violating
+proposals the agent makes. (ii)~\emph{Knowledge:} it knows the policy, the scoring function, and
+the threshold. (iii)~\emph{Judge-input rewriting} (Def.~\ref{def:adversary}): at deployment,
+adaptively across steps, it may replace the judge-visible representation $z=J(\tau,o,a)$, with
+$\tau$ the committed effect history and $o$ the untrusted context the judge reads, by any $z'$
+with $d(z,z')\le\rho$, e.g., by inserting at most $\rho$ tokens into a tool-output field,
+leaving the action, its effect, and its label unchanged; since tool outputs are attacker-written,
+$\rho$ is limited in practice only by the field length, so a margin must be stated for the budget a
+deployment admits. Calibration examples are benign. Theorem~\ref{thm:adv} prices only~(iii): it
+requires that the violating proposals produced under~(i) remain label-conditionally exchangeable
+with the calibration violations (Assumption~\ref{ass:benign}), and an adversary that uses~(i) to
+choose or shift the induced violation, e.g., toward goals whose text reads as benign
+(\S\ref{exp:q1}), voids that assumption and with it Theorems~\ref{thm:conformal}
+and~\ref{thm:adv}. Our experiments (\S\ref{exp:q3}) instantiate only black-box members
+of~(iii), which lower-bound $\bar\eta(\rho)$: they can refute a margin but never certify one. A deployed gate should treat a refusal or any other non-answer as a
+block (fail-closed); \S\ref{sec:exp} states how our caches score refusals. Out of scope are
+compromise of the gate, the oracle, or the trusted adapters; training-time poisoning of the
+judge or of the calibration set; side channels; and adversarially induced false blocks (a
+denial-of-service lever our bounds do not price).
+
+\paragraph{Goals and what ``certified'' means}
+The gate is a reference monitor for tool calls \citep{anderson1972planning}: we assume
+complete mediation (every external effect is a typed tool call through the gate, which
+excludes generic code-execution tools) and a tamperproof TCB, and T3 addresses the third
+requirement, verifiability of the policy; blocking is the fail-safe default
+\citep{saltzer1975protection}. ``Certified'' has exactly two senses. The first is streamwise
+enforcement relative to fixed oracle predicates: a gate is sound if every committed trace is
+safe for $P$ and transparent if it never alters a compliant stream (Def.~\ref{def:gate}),
+for every proposal stream. The second is a marginal risk bound: under
+Assumption~\ref{ass:benign}, a calibrated gate bounds the probability of an unsafe episode by
+$\delta$, marginally over episodes and the calibration draw (Theorem~\ref{thm:conformal});
+against the budget-$\rho$ adversary the bound becomes \mbox{$\min\{1,\delta+H\bar\eta(\rho)\}$}
+(Theorem~\ref{thm:adv}), and margin-aware recalibration restores $\delta$ once a uniform
+margin $\bar\eta(\rho)<\delta/H$ is verified, at a cost in false blocks
+(Corollary~\ref{cor:robust}). The availability goal mirrors soundness: transparency in the
+oracle regime, and a reported false-block rate at the certified miss level in the judge
+regime. Universal semantic safety is a non-goal.

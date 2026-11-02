@@ -1,0 +1,65 @@
+\section{T3: Decidability of Policy Analysis}\label{sec:t3}
+
+Theorem~\ref{thm:t1} makes enforcement constructive once a nonempty policy is given as a
+$\Th$-representable safety automaton; static analysis of the specification is a different
+problem. Even \emph{nontriviality} (can the rule ever fire, the basic check a policy linter runs)
+is undecidable for an expressive guard theory, a \emph{symbolic} question orthogonal to the
+\emph{semantic}-censorship undecidability of \citet{glukhov2023censorship}.
+
+\begin{proposition}[Specification analysis is undecidable; immediate from Minsky machines]\label{thm:undec}
+There is a guard theory $\Th^{\ast}$ (equality plus two global
+$\mathbb N$-counters with increment, guarded decrement, and zero-test) for
+which the following is undecidable: given
+a deterministic, trim register automaton over $\Th^{\ast}$ with a designated bad state,
+decide whether the bad state is reachable, equivalently whether the specified
+policy is \emph{nontrivial} (has a bad prefix, i.e., rules out at least one finite
+behavior). The reduction is from two-counter Minsky-machine halting.
+\end{proposition}
+
+\noindent\emph{Proof idea.} The automaton's control and two global counters simulate a two-counter
+Minsky machine \citep{minsky1967computation} on $\mathsf{tick}^n$, with zero tests as guards and
+the halt label as the bad state; a second action moves every nonbad label to a good sink, so the
+policy stays nonempty and enforceable by T1 while the static question is undecidable. No data
+values are used (Supplement~A.4).
+
+Two decrementable, zero-testable counters are one source of undecidability; monotone counters regain it if
+guards compare counters, and shared amount fields already compare counters below the guard constants
+($x+v=K\wedge y+v=K-c$), which keeps $\Th_0$ decidable but is why its \NP{} bound needs cap checks. A policy
+language with two uncapped, refundable budgets cannot ship a complete ``can this rule fire'' linter, whereas
+caps, quotas, and revocation need one SMT query and authenticate-before-access stays in \PSPACE.
+
+\begin{theorem}[A decidable, expressive fragment]\label{thm:frag}
+Over an infinite equality-data sort and a separate binary-encoded
+$\mathbb{N}$ amount sort, let $\Th_0$ be the class of finite, separable, disjunctive products of total
+deterministic components over a common alphabet: (E) equality-register
+monitors; (K) a uniform key-local monitor whose action names at most one key and only that
+key's local state and monotone counters may be read or updated; and (V) one component with finite
+control and one finite vector of monotone counters. Updates add nonnegative fixed or action-supplied
+integers; each amount field has one shared value across all its uses. Atomic guards compare
+one counter (or counter plus that amount) with a binary-encoded constant,
+never another counter. Component guards partition every input (missing cases
+go to bad), and separability forbids cross-component guards or assumptions.
+Bad-prefix reachability is \PSPACE-complete, and hard already for one (E) component; membership
+follows by exact cap saturation for (K,V), exact one-witness projection for (K), and
+on-the-fly search. Without (E) components, with keys over the equality sort, and if every amount atom
+is a cap check (the guarded case adds that amount to the tested counter or enters the bad state), as for
+caps, quotas, and revocation, it is \NP-complete. Online enforcement takes polynomial time per step with saturated counters. The fragment
+expresses authenticate-before-access, per-recipient caps, bucket quotas, no-send-after-revoke, and
+fixed-vector quotas, including P2 and P3 (Supplement~A.4).
+\end{theorem}
+
+\noindent\emph{Proof idea.} Caps saturate: counters only grow and each guard compares one counter
+with a constant, so $\min\{x,C_x+1\}$ is an exact abstraction. One witness key suffices for (K),
+because a key-local rejecting run projects onto its first rejecting key and lifts back by renaming;
+separable, total components reduce product rejection to one component. Searching the saturated
+graph on the fly gives membership; for hardness, one (E) component with a register per tape cell
+simulates a polynomial-space Turing machine, as in the \PSPACE{} lower bound for register-automaton nonemptiness \citep{demri2009ltl} (Supplement~A.4).
+Without registers and with cap checks, counters climb through the polynomially many intervals between guard constants,
+so a run has polynomially many phases with fixed guard outcomes, each a Parikh-image constraint;
+one existential Presburger formula, i.e., one SMT query, decides nontriviality
+\citep{verma2005parikh,scarpellini1984presburger}, and \textsc{sat} reduces to set-once flags. For P2,
+the analysis tracks one composite key $(k,w)$, however many keys the runtime gate stores.
+For trim $\Th_0$ specifications $\mathcal A,\mathcal B$, deciding $P_{\mathcal A}\subseteq P_{\mathcal B}$, i.e., redundancy of rule $\mathcal B$ given $\mathcal A$
+(\S\ref{sec:q5}), is also \PSPACE-complete if $\mathcal A$ has no (K) component and only counters read amounts, and co\NP-complete if moreover
+neither has (E) components and every amount atom is a cap check, as in \S\ref{sec:q5} (Supplement~A.4).
+

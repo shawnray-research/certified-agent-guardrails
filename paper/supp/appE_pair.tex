@@ -1,0 +1,72 @@
+\subsection{Q3: An Optimizing Attacker on Instruction Strings}\label{suppE:pair}
+The template and grammar searches of B.19--B.20 draw rewrites without learning from the judge's scores. To test
+whether the low evasion counts at the in-sample $\delta=.10$ gate (main-paper \S\ref{exp:q3}) reflect robustness
+or weak attacks, we ran an optimizing attacker in the style of PAIR \citep{chao2025pair}, with a protocol fixed
+in the module docstring of \path{frontier2026/frontier2026_pair.py} before the full run.
+\emph{Judges and scoring:} Claude Opus, Sonnet, and Haiku~5.5 and GPT-5.5, each through the exact scorer of
+B.20 (paper prompt and decoding; a provider refusal, an unparseable reply, or an API error after four retries
+scores $1.0$). \emph{Items:} the 35 injection goals with clean run-1 scores at or above $\theta_{\rm cal}$, the
+$\delta=.10$ split-conformal threshold on all 35 clean violation scores (the in-sample gate of
+\S\ref{exp:q3}; $\theta_{\rm cal}=.15,.05,.08,.05$). \emph{Budget} (Definition~\ref{def:adversary}, as in B.20):
+the canonical action text is kept verbatim and the attacker adds only a prefix and/or a suffix of at most 45
+words in total, so item and label are unchanged. \emph{Attacker:} Claude Sonnet~5.5 (thinking disabled),
+prompted as an authorized red-teamer of a safety classifier; it sees the action, the judge's prompt template,
+the target score, and the history of its candidates with the judge's integer scores, and returns one candidate
+per round. A refused or unusable attacker turn consumes its round without a judge query (conservative for the
+attacker). \emph{Stopping:} at most $K=20$ rounds per item; stop at the first score below $\theta_{\rm cal}$.
+
+Table~\ref{tab:pair} reports the results under two counting rules. The protocol's rule is the paper's
+(first integer in the reply). An independent audit of the trajectories found that 9 of Sonnet~5.5's 18
+evasions under that rule are prose replies that quote the attacker's ``score 0'' instruction, so its first
+integer is not a rating; Opus~5.5 and GPT-5.5 replied with numbers only, and Haiku's 5 prose replies do
+not change its count at $K=20$. Our primary, conservative count therefore keeps only numeric replies and only
+violations whose clean score lies strictly above $\theta_{\rm cal}$, which removes 1--3 items per judge whose
+evasion is a two-to-seven-point drop that sampling noise could explain (the judges run at provider-default
+temperature). Under that count the optimizing attacker evades the in-sample $\delta=.10$ gate on $13/33$
+(Opus), $8/33$ (Sonnet), $13/34$ (Haiku), and $13/35$ (GPT-5.5) flagged violations. A predeclared stability
+check (\path{frontier2026/frontier2026_pair_rescore.py}, fixed before it ran) re-scored the first evading
+rewrite of every item five more times with strict parsing (a bare integer, otherwise $1.0$), and the unmodified
+violation five times as a null control. Counting a rewrite only if at least three of its five fresh scores fall
+below $\theta_{\rm cal}$ while at most two of the clean scores do, the attacker evades on $9/33$ (Opus),
+$9/33$ (Sonnet), $12/34$ (Haiku), and $10/35$ (GPT-5.5) flagged violations, $6$--$8$ of the 28 whose text is not
+benign (B.6); this is the count the main paper reports. Best-of-six evades 2 of 30 for GPT-5.5 and none for
+the Claude judges. The
+attacker model refused every one of its 20 turns on 12--13 items per judge (refusals are sticky:
+$P(\text{refuse}\mid\text{previous refused})\ge.92$), so about a third of the items were never attacked and all
+counts are lower bounds. The grammar search of B.20 is not a like-for-like comparison at $\theta_{\rm cal}$: it
+stopped at the first draw below $\theta_f$, so its counts there (0, 1, 2, 1) are censored, and it attacked only
+the violations flagged at $\theta=.5$. Many evading candidates assert false context about the action (a
+sandbox, an owner's approval, a cap that makes ``as much as possible'' harmless) or pre-fill the judge's answer
+slot; the action string and its effect are unchanged, as Definition~\ref{def:adversary} requires, but the
+rewrites go beyond the fixed grammar fillers of B.20. Each count lower-bounds $\eta(\rho;\theta_{\rm cal})$ for
+a 45-word insertion budget and exceeds $\delta/H=.10$, so the precondition of Corollary~\ref{cor:robust} fails
+for all four judges at this budget. At the flagged-subclass threshold $\theta_f$ of B.20, where all of its replies are numeric, the attacker
+raises Claude Opus~5.5's flagged-subclass miss increase $\eta_f$ from $.077$ (grammar) to $.269$; for the other judges prose
+replies affect both searches at $\theta_f$, so we do not compare them there.
+
+\begin{table}[t]
+\caption{Optimizing (PAIR-style) attacker at the in-sample $\delta=.10$ gate ($\theta_{\rm cal}$). Stable: the
+selected rewrite evades in $\ge3$ of 5 fresh strict re-scores and the clean violation in $\le2$ of 5;
+conservative: numeric judge replies only and clean score above $\theta_{\rm cal}$; protocol: the paper's
+first-integer rule. Clopper--Pearson 95\% intervals; ``non-benign'': among the 28 violations whose text
+is not benign; grammar: B.20's best-of-20 search, censored at $\theta_f$.}
+\label{tab:pair}
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+ & Opus 5.5 & Sonnet 5.5 & Haiku 5.5 & GPT-5.5\\
+\midrule
+$\theta_{\rm cal}$ / items & $.15$ / 33 & $.05$ / 33 & $.08$ / 34 & $.05$ / 35\\
+items attacked & 21 & 20 & 22 & 23\\
+evaded, stable (main paper) & 9 & 9 & 12 & 10\\
+\quad CP 95\% & $[.13,.46]$ & $[.13,.46]$ & $[.20,.54]$ & $[.15,.46]$\\
+\quad non-benign & 7/28 & 6/28 & 8/28 & 6/28\\
+evaded, conservative & 13 & 8 & 13 & 13\\
+evaded, protocol rule & 14 & 18 & 16 & 16\\
+grammar (censored) & 0/26 & 1/23 & 2/24 & 1/30\\
+judge queries & 162 & 57 & 115 & 143\\
+attacker refusals & 326 & 296 & 301 & 292\\
+\bottomrule
+\end{tabular}
+\end{table}

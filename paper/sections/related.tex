@@ -1,0 +1,63 @@
+\section{Related Work}\label{sec:related}
+
+\paragraph{Runtime enforcement}
+Security automata enforce only safety properties \citep{schneider2000enforceable};
+computability and monitor memory refine the enforceable class
+\citep{hamlen2006computability,fong2004shallow,talhi2008memory}, and edit automata enforce
+more by suppressing and inserting actions \citep{ligatti2005edit}. Our gate is a
+supervisor \citep{ramadge1987supervisory} without buffering, so given the same oracles its
+class lies strictly below that of edit automata (Proposition~\ref{prop:strict}).
+Unlike enforcement over merely observable actions \citep{basin2013enforceable} or with
+buffering \citep{falcone2012verify}, T1 treats each tool call as controllable before an
+irreversible commit. Mandatory-results automata \citep{ligatti2010mra} also answer each action
+before the target proceeds, and proactive first-order enforcement \citep{hublet2024proactive}
+suppresses or causes events against metric first-order policies; neither separates exact
+predicates from a fallible judge, which is the split T1 and T2 are built on.
+Parametric monitors \citep{rosu2012parametric}, quantified event automata
+\citep{barringer2012qea}, and register monitors \citep{grigore2013register} handle
+data-carrying events; our key maps resemble their trace slicing, and their safety monitors yield gates
+(Theorem~\ref{thm:t1}). Counting
+extensions of past-time metric temporal logic admit trace-length-independent monitoring for many,
+but not all, quantitative policies \citep{du2021tracelength}; T3 asks instead whether a
+counter policy is nontrivial at all. \citet{david2026alignment} state an enforceability
+schema for agent guardrails whose two directions are left as proof obligations; T1 proves
+both for register-recognizable policies over infinite effect traces.
+
+\paragraph{Agent defenses and guardrails}
+Injected instructions reach agents through tool outputs \citep{greshake2023injection}, tool
+descriptions \citep{guo2026mcpxkit}, and messages between collaborating models
+\citep{yang2026cracks}. System-level designs restrict what untrusted data can influence through control/data
+separation, information-flow labels, or privilege policies
+\citep{debenedetti2025camel,costa2025fides,progent2025}; they decide from trusted metadata,
+which places them in T1's oracle regime, exact only while the labels are intact. Rule and
+contract gates \citep{agentspec2026,xiao2026contragent,reddy2026reasonless} are T1 gates,
+and finite-state contracts over action-local predicates capture only a regular subclass of
+T1's policies; comparing data values across calls needs registers, which ContrAgent \citep{xiao2026contragent} keeps
+outside its DFAs. CAGE's exact variant certifies that an
+authorization stays valid across bounded faults in typed tool returns
+\citep{delattre2026cage}, which hardens the inputs of a T1 check, and the guarantee of \citet{wu2026provably} is
+conditional on a lossless first-order restatement, whose errors fall under T2. Detectors
+and guard models \citep{inan2023llamaguard,chennabasappa2025llamafirewall,li2025piguard} are
+bounded by their ROC. Their benign
+certificates do not survive adaptive attacks \citep{nasr2025attacker,zhan2025adaptive}, universal or optimized
+injections into LLM judges \citep{raina2024judgerobust,shi2024judgedeceiver}, or injected text fed
+to monitors \citep{terekhov2026adaptive} in AI-control protocols \citep{greenblatt2024aicontrol},
+and context-tailored rewrites raise jailbreak success against customized LLM applications
+\citep{xu2026redagent}; what we add is the margin $\bar\eta(\rho)$, the risk it
+costs (Theorem~\ref{thm:adv}), and when recalibration restores the certificate
+(Corollary~\ref{cor:robust}).
+
+\paragraph{Closed-loop and statistical guarantees}
+Certificates computed from a model of the gated loop \citep{baheri2026controller,gu2026certified}
+hold for every controller or proposal sequence under exact predicates (Gu--Zhu's
+deterministically, Baheri--Wei's as a PAC bound on unsafe entry); judge error
+enters once a fallible judge decides, and the agent's response to a block, documented
+empirically \citep{vasudev2026accurate}, is what Proposition~\ref{prop:feedback} shows ungated
+data cannot identify. CORA calibrates a pre-action gate by conformal risk control on a joint
+harm-and-execute budget \citep{feng2026cora}, which executing everything meets whenever harms
+are rarer than the budget; calibrating on violations alone bounds the miss rate itself.
+Corollary~\ref{cor:robust} is a risk-level analogue of adversarially robust conformal
+prediction \citep{gendler2022robustconformal}, and a certified insertion defense
+\citep{kumar2024certifying} supplies the verified margin it requires. Supplement~D maps over
+twenty further systems to our regimes and traces the dependability lineage of the gate and the
+card.

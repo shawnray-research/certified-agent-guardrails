@@ -1,0 +1,1005 @@
+\section{Proofs}
+
+
+\subsection*{A.1\quad Preliminaries and notation}
+We work in the Cantor topology on $\Aomega$, whose basic open sets are the
+cylinders $u\Aomega$ for $u\in\Astar$. A set $P\subseteq\Aomega$ is \emph{closed}
+iff it contains all its limit points, where $x$ is a limit point of $P$ if every
+prefix $x_{\le n}$ is a prefix of some element of $P$. We use repeatedly the
+classical characterization of safety.
+
+\begin{lemma}[Safety is topological closure]\label{lem:safety-closed}
+$P\subseteq\Aomega$ is a safety property (Def.~\ref{def:safety}) if and only if
+$P$ is closed. Equivalently, $x\in P$ iff every finite prefix $x_{\le n}$ is a
+\emph{good prefix}, i.e., $x_{\le n}\notin\Bad(P)\Astar$.
+\end{lemma}
+\begin{proof}
+If $P$ is safety and $x\notin P$, then $x$ has a bad prefix $x_{\le n}$, so the
+open cylinder $x_{\le n}\Aomega$ is disjoint from $P$; hence the complement of $P$
+is open and $P$ is closed. Conversely, if $P$ is closed and $x\notin P$, then $x$
+is not a limit point, so some prefix $x_{\le n}$ extends into $P$ nowhere, i.e.,
+$x_{\le n}\Aomega\cap P=\emptyset$; that prefix is a bad prefix, so $P$ is safety.
+The prefix characterization is the contrapositive: $x\in P$ iff no prefix is bad.
+\end{proof}
+
+Recall (Def.~\ref{def:gate}) that a gate $g$ decides from committed effect
+history $\tau_{<t}\in(\A\setminus\{\noop\})^{*}$, proposal $a_t$, and
+$\Pi(\tau_{<t},a_t)$ (in the oracle case $g$ is computable relative to $\Pi$, so it may also use the bits $\Pi$ returned at earlier committed steps; for the fixed $\Pi$ its decision is still a function of $\tau_{<t}$ and $a_t$). We assume $\Pi$ reads this same effect history (equivalently,
+an interface defined on full committed traces must be $\noop$-blind).
+We keep $\Pi$ explicit: it is an available oracle interface,
+not a promise that its bits are definable in $\Th$. A
+\emph{$(\Th;\Pi)$-gate} runs a deterministic keyed-counter register automaton (Def.~\ref{def:safety}), whose
+guards combine $\Th$ tests with queries to these bits, once and online over the committed effect history, and decides each
+proposal by the one transition the automaton takes on it from the configuration reached (labeled $\allow$, $\block$, or
+$\subst(t)$ for a term $t$ over the proposal's fields, the registers, and constants). A
+\emph{proposal stream} is a map from committed histories to proposed actions;
+together with $g$ it determines the committed trace. We write $\noop$ for the
+neutral no-op of Def.~\ref{def:actions}. Because policies are scored on \emph{effect}
+traces (Def.~\ref{def:actions}), the recognizer $\mathcal R$ of $\Good(P)$ reads only
+effect actions: committing $\noop$ produces no effect and leaves $\mathcal R$'s state
+unchanged (so $\delta(q,\noop)=q$), and a trace is safe for $P$ iff no finite prefix of
+its effect trace is bad and an infinite effect trace lies in $P$ (for safety $P$ the
+second clause follows from the first by Lemma~\ref{lem:safety-closed}). Table~\ref{tab:notation} collects the notation.
+
+\begin{table}[t]
+\caption{Notation.}
+\label{tab:notation}
+\centering\footnotesize
+\begin{tabularx}{\columnwidth}{@{}>{\raggedright\arraybackslash}p{0.30\columnwidth}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Symbol & Meaning\\
+\midrule
+$\A,\Astar,\Aomega$ & action alphabet; finite and infinite traces\\
+$\noop$, $\erase$ & neutral no-op action; external-effect projection (deletes $\noop$)\\
+$P,\Bad(P),\Good(P)$ & policy; minimal bad prefixes; good prefixes\\
+$\Th$, $\Pi$ & guard theory; fixed vector of oracle predicate bits\\
+$\RA[\Th;\Pi]$ & languages recognized by keyed-counter register automata with $\Th$-guards and oracle bits $\Pi$\\
+$\pi_i,\hat\pi_i^{\theta}$ & ground-truth predicate; thresholded judge\\
+$\alpha(\theta),\beta(\theta)$ & judge false-alarm and miss rates\\
+$\ROC(\beta)$, $\ROC_I(\beta)$ & ROC frontier: least $\alpha$ at miss $\beta$ (given $I$)\\
+$g,\Dec$ & gate; decisions $\{\allow,\block,\subst\}$\\
+$R,U$ & episode unsafe rate; utility loss\\
+$F_H(\delta)$ & controlled episode frontier (Def.~\ref{def:controlled})\\
+$h_t$, $\psi$, $\mu$ & gate's observable history; gate policy; logging policy (Def.~\ref{def:controlled}, Prop.~\ref{prop:explore})\\
+$F_0,F_1$, $Q_\rho$ & compliant and violating score laws; attacked violation-score law\\
+$o$ & untrusted context the judge reads (Def.~\ref{def:adversary})\\
+$r(\theta)$, $\hat\theta$ & per-step conditional miss risk; calibrated threshold\\
+$H,\delta$ & horizon; target episode risk\\
+$\eta(\rho;\theta),\bar\eta(\rho)$ & robustness margin at $\theta$; uniform margin $\sup_\theta\eta(\rho;\theta)$\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection*{A.2\quad T1: oracle characterization}
+\noindent\textbf{Theorem~\ref{thm:t1}} (Oracle characterization)\textbf{.}
+\emph{Fix the available oracle interface $\Pi$ and a nonempty policy $P$. Then $P$ is precisely
+enforceable by a deterministic $(\Th;\Pi)$-gate iff it is safety and
+$\Good(P)\in\RA[\Th;\Pi]$; the witness simulates that recognizer and refuses
+exactly the one-step extensions it rejects.}
+
+\begin{proof}
+\emph{($\Leftarrow$).} Let $\mathcal R$ be a deterministic keyed-counter register automaton
+(Def.~\ref{def:safety}) recognizing $\Good(P)$ with guards in $(\Th;\Pi)$; below, $q$ ranges over its
+configurations (control state, registers, key maps, counters), $q_0$ is the initial one, $\delta$ the
+deterministic update, and $B$ the absorbing bad configurations. Define the gate $G$ that maintains
+$q_t=\delta^{*}(q_0,c_{\le t})$ and, on
+proposed $a$ at state $q$, commits $a$ (moving to $\delta(q,a)$) if
+$\delta(q,a)\notin B$, and otherwise commits $\noop$ (a \emph{block}, leaving the
+state at $q$).
+
+\emph{Soundness.} Blocking commits $\noop$ (no effect; the recognizer does not move);
+an allowed action moves within $\Good(P)$ by construction, since $G$ blocks exactly the
+one-step extensions entering $B$, and $q_0\notin B$ because $\varepsilon\in\Good(P)$ for nonempty $P$ (the only use of nonemptiness: for $P=\emptyset$, $\Good(P)=\emptyset$ is recognizable yet no gate is sound). So the committed run visits only good states and every
+effect prefix $\erase(c_{\le t})\in\Good(P)=\Astar\setminus\Bad(P)\Astar$ is not bad.
+Hence the committed trace is safe for $P$ (Def.~\ref{def:actions}): if the effect trace is
+infinite it lies in $P$ by Lemma~\ref{lem:safety-closed}; if the gate eventually blocks
+forever, the finite effect trace still has no bad prefix. This holds for every proposal
+stream.
+
+\emph{Transparency.} Suppose the proposed $\omega$-trace $w$ lies in $P$. By
+Lemma~\ref{lem:safety-closed} every prefix of $w$ is good, so running $\mathcal R$
+on $w$ never reaches $B$; hence $G$ never blocks and commits $w$ unchanged.
+
+\emph{Complexity.} Each step evaluates the enabled guarded transition on the
+current data, registers, and supplied oracle bits. This is polynomial when
+guard evaluation and updates are polynomial; no satisfiability solver is
+implicitly assumed.
+
+\emph{($\Rightarrow$).} We work in the effect alphabet $\A\setminus\{\noop\}$, over which
+$P$ and its traces live. Suppose the $(\Th;\Pi)$-gate $g$ precisely enforces $P$ but $P$ is not
+safety. By Lemma~\ref{lem:safety-closed}, $P$ is not closed, so it has a limit point
+$x\notin P$ that is a doomed \emph{effect} trace: for every $n$ there is an effect trace
+$z^{(n)}\in P$ with $z^{(n)}_{\le n}=x_{\le n}$. Let $S$ be the \emph{open-loop} stream
+proposing $x_1,x_2,\dots$ in turn (a fixed sequence, independent of the gate's actions). We
+show by induction on $t$ that $g$ allows $x_t$, so the committed effect trace is $x$.
+
+Base case $t=0$ is immediate. For the step, assume $g$ has allowed $x_1,\dots,x_{t-1}$, so the
+committed effect history is $x_{<t}$ and the proposal is $x_t$. Consider the open-loop stream
+$S^{(t)}$ proposing $z^{(t)}_1,z^{(t)}_2,\dots$; its proposed effect trace is $z^{(t)}\in P$,
+so by \emph{prefixwise} transparency (Def.~\ref{def:gate}) the committed effect prefix equals
+$z^{(t)}_{\le k}$ at every step $k$. Thus $g$ blocks or alters nothing on $S^{(t)}$, and in
+particular allows $z^{(t)}_t=x_t$ from the committed effect history $z^{(t)}_{<t}=x_{<t}$.
+Because $g$ conditions on the \emph{effect} history (Def.~\ref{def:gate}), its decision here is
+the value $g(x_{<t},x_t,\Pi(x_{<t},x_t))$, identical under $S$ and $S^{(t)}$; being
+deterministic, $g$ also allows $x_t$ under $S$. By induction $g$ commits the infinite
+effect trace $x\notin P$, contradicting soundness (clause (ii) of Def.~\ref{def:actions}).
+Note that $x$ has no bad prefix (every $x_{\le n}$ extends into $P$), which is why soundness
+must constrain infinite effect traces and not only their finite prefixes. Hence $P$ is safety.
+
+It remains to recognize $\Good(P)$. Simulate the finite control, registers, and
+committed-history updates of $g$ while reading a proposed finite word $u$, and
+move to a rejecting sink at the first step whose committed action differs from the proposal (an identity $\subst(a)$ counts as $\allow$). This is a
+deterministic $(\Th;\Pi)$ register automaton. If $u\in\Good(P)$, then $u$ has a
+completion in $P$ (otherwise $u$ itself would be bad), and prefixwise transparency
+forces every symbol of $u$ to be allowed. Conversely, if $u$ contains a first bad
+prefix $va$, transparency on a compliant completion of $v$ forces $g$ to allow
+$v$, while soundness forbids allowing $a$ from that history; thus the simulation
+rejects. Its language is exactly $\Good(P)$, proving
+$\Good(P)\in\RA[\Th;\Pi]$.
+\end{proof}
+
+\begin{remark}[General computable gates]
+Dropping the register restriction, the same limit-point argument shows an
+arbitrary computable gate with interface $\Pi$ precisely enforces a nonempty
+$P$ iff $P$ is safety and good-prefix membership is decidable relative to $\Pi$.
+$(\Th;\Pi)$-gates are the register-recognizable subclass.
+
+For a randomized gate, quantify separately: for every (possibly adaptive)
+proposal strategy, soundness holds with probability one over gate randomness;
+and for every fixed compliant proposal trace, prefixwise transparency holds
+with probability one. On each compliant $z^{(t)}$ agreeing with a doomed limit
+trace $x$ through $t$, transparency makes the conditional decision at history
+$x_{<t}$ equal to $\allow$ almost surely. The countable intersection of these
+probability-one events makes the gate commit all of $x$ almost surely,
+contradicting almost-sure soundness. Thus randomization does not extend the
+safety boundary (although the register-representability converse above is stated
+only for deterministic gates).
+\end{remark}
+
+\medskip
+\noindent\textbf{Proposition~\ref{prop:strict}} (A strict hierarchy)\textbf{.}
+\emph{(i)~The gate-enforceable policies are a strict subclass of the edit-automaton
+enforceable policies (edit automata given the same oracle bits $\Pi$). (ii)~If $\Pi$ is action-local and recipients range
+over an infinite equality-only data sort, then no $(\Th;\Pi)$-gate without key maps (whatever its registers, global counters,
+and counter guards and updates) enforces the per-recipient cap of one, which a $(\Th_0;\Pi)$-gate with one key-local flag
+enforces.}
+
+\begin{proof}
+Every gate-enforceable policy is safety with a good-prefix language decidable relative to $\Pi$
+(Theorem~\ref{thm:t1}, and the remark above for general computable gates); an edit automaton given the same oracle bits $\Pi$ enforces each such policy by suppressing any action
+that would enter $\Bad(P)$ and re-emitting nothing (safety properties are a subclass of
+the renewal properties edit automata enforce \citep{ligatti2005edit,ligatti2009nonsafety}),
+giving containment. For strictness,
+let $\A$ contain irreversible $\mathsf{pay}$ and $\mathsf{confirm}$ and let
+\[
+  P^{\ast}=\{w\in(\A\setminus\{\noop\})^{\omega}:\text{every }\mathsf{pay}\text{ has a later }\mathsf{confirm}\}.
+\]
+\emph{$P^{\ast}$ is not safety.} The effect trace $\mathsf{pay}^{\omega}$ violates
+$P^{\ast}$, yet no finite prefix is bad: any prefix $\mathsf{pay}^{k}$ extends to
+$\mathsf{pay}^{k}\,\mathsf{confirm}^{\omega}\in P^{\ast}$.
+By Lemma~\ref{lem:safety-closed}, $P^{\ast}$ is not safety, so by Theorem~\ref{thm:t1} no
+gate enforces it. \emph{Self-contained impossibility.} Each $\mathsf{pay}$ must be
+decided irrevocably. On the open-loop stream $\mathsf{pay}^{\omega}$, suppose the gate
+has allowed the first $t-1$ payments; the committed effect history $\mathsf{pay}^{t-1}$
+and the proposal $\mathsf{pay}$ are then exactly those of the compliant stream
+$\mathsf{pay}^{t}\,\mathsf{confirm}^{\omega}\in P^{\ast}$, on which prefixwise
+transparency forces $\allow$. So the gate allows every $\mathsf{pay}$ and commits the
+infinite effect trace $\mathsf{pay}^{\omega}\notin P^{\ast}$; the payments are
+irreversible, no later decision can repair the violation, and the gate is unsound. Substitution does not help:
+replacing $\mathsf{pay}$ by a semantically distinct action fails transparency,
+and replacing it by an equivalent $\mathsf{pay}$ returns to the first case.
+\emph{Edit-enforceable.} An $\omega$-policy counts as edit-enforceable when some extension of it to finite executions is. Containment above judges finite executions as good prefixes; that extension of $P^{\ast}$ (which has no bad prefix) accepts every finite execution and is not renewal, since $\mathsf{pay}^{\omega}\notin P^{\ast}$ has infinitely many valid prefixes. If instead a finite execution is judged valid iff each of its $\mathsf{pay}$s has a later $\mathsf{confirm}$ within it, $P^{\ast}$ is a renewal property; an edit automaton
+suppresses each unconfirmed $\mathsf{pay}$, and every action after it, into a buffer and emits the buffer in order upon the next $\mathsf{confirm}$
+(and never if $\mathsf{confirm}$ does not occur), which is edit-enforceable by the
+renewal-property theorem of \citet{ligatti2009nonsafety}. Thus $P^{\ast}$ separates
+the classes. The comparison is at the level of enforceable policy \emph{classes}, each in
+its own model's semantics: edit automata enforce $P^{\ast}$ by buffering, which presumes
+actions can be delayed and re-emitted; irreversibility removes exactly that power, which is
+why the classical class is unattainable for a pre-execution gate over committed actions,
+not a defect of the gate.
+
+\emph{Part (ii).} Let $P_1$ be the set of infinite effect traces in which no two $\mathsf{send}$ actions name the same
+recipient (other actions are unconstrained). It is safety, its bad prefixes being exactly the finite effect traces with two
+$\mathsf{send}$s to one recipient, and it is nonempty because the recipient sort is infinite. A $(\Th_0;\Pi)$-gate enforces $P_1$
+by Theorem~\ref{thm:t1}: a (K) component maps each recipient to a flag set by its first send and rejects a send whose flag is
+set; it is trim, since a send to an unflagged recipient is always available, so its non-bad language is exactly $\Good(P_1)$.
+Now let $g$ be a $(\Th;\Pi)$-gate without key maps, with $r$ registers and finitely many global counters, over an
+equality-only recipient sort: a recipient enters its guards and updates only through equality with registers, with the other
+fields of the current action, and with the finitely many constants of the automaton (guard constants, initial register
+contents, and constants in substitution terms), and through the oracle bits, which for action-local $\Pi$ depend on the
+proposed action alone. Fix the non-recipient fields $\bar f$ of $\mathsf{send}$. As $\Pi$ takes finitely many values, some
+infinite set $D'$ of recipients, avoiding the automaton's constants and the data values in $\bar f$, gives sends with equal
+bits. Feed $\mathsf{send}(d_1,\bar f),\ldots,\mathsf{send}(d_{r+1},\bar f)$ for pairwise distinct $d_i\in D'$; this prefix extends
+to the compliant stream that continues with fresh recipients, so prefixwise transparency allows every send. The configuration
+reached stores at most $r$ data values, so some $d_j$ is in no register. Let $e\in D'$ be neither among the $d_i$ nor in any
+register. In this configuration, $\mathsf{send}(d_j,\bar f)$ and $\mathsf{send}(e,\bar f)$ satisfy exactly the same guards
+(neither recipient equals a register, a constant, or a value in $\bar f$, and their bits agree), so $g$ takes the same
+transition on both and outputs the same decision term. Transparency on the compliant stream that continues with
+$\mathsf{send}(e,\bar f)$ and further fresh recipients forces that term to commit $\mathsf{send}(e,\bar f)$ unchanged. As $e$
+equals no register value and no constant, the term is $\allow$ or a substitution that copies the proposed recipient, and on
+$\mathsf{send}(d_j,\bar f)$ either one commits $\mathsf{send}(d_j,\bar f)$, completing a bad prefix and contradicting soundness.
+The argument is the pumping argument of \citet{kaminski1994finite}. It needs determinism and the register-automaton form: a
+general computable gate (Remark~\ref{rem:general-gates}) enforces $P_1$ without key maps, and so does a register-free gate
+given the history-dependent bit $\mathbf{1}[\tau\cdot a\in\Good(P_1)]$.
+\end{proof}
+
+\medskip
+\noindent\refstepcounter{proposition}\textbf{Proposition~\theproposition} (Substitution: same class; a utility gain only with a judge)\textbf{.}
+\emph{(i)~Adding $\subst(a')$ does not change the class in T1, and in the oracle regime a
+transparent gate never alters a compliant proposal, so substitution cannot lower $U$ there.
+(ii)~Consider a judge-driven gate (relaxing the block-only clause of
+Assumption~\ref{ass:benign}) that, whenever its judge flags a proposal at good prefix $u$, can
+compute from its own inputs a rewrite with $ua'\in\Good(P)$ (certified without the
+ground-truth bits) and conditional loss at most $\ell_{\rm sub}\in[0,1]$ relative to unit loss
+for a block. Then substituting instead of blocking reduces the false-block loss at good prefixes from
+$\alpha(\theta)$ to at most $\ell_{\rm sub}\alpha(\theta)$ at unchanged miss.}
+\begin{proof}
+(i)~Run the T1 recognizer. When $ua$ would be rejected, either block or choose any
+$a'$ with $ua'\in\Good(P)$ and update the recognizer on $a'$. The committed
+run remains good, and no rewrite fires on a compliant proposed trace, so
+soundness and transparency hold. Conversely, the T1 limit argument and
+never-alter recognizer apply to gates with substitution as well, so adding that
+decision cannot enlarge the class. The oracle recognizer rejects only bad extensions, so it
+never alters a compliant proposal and $U=0$ with or without substitution. The same holds for every transparent gate: if the committed
+effect history is $u$ and $ua\in\Good(P)$, prefixwise transparency on the open-loop stream of a
+completion $w\in P$ of $ua$ forces $\allow$ at $(u,a)$, and the decision depends only on $(u,a)$.
+
+(ii)~Under the stated loss normalization, a compliant proposal is flagged, and so sent to
+the rewrite branch, with probability $\alpha(\theta)$ and costs at most
+$\ell_{\rm sub}$ there; a flagged violation is replaced by a prefix-safe action instead of
+being blocked, so the decisions on violations, and hence the miss, are unchanged. Its expected conditional loss is therefore at most
+$\ell_{\rm sub}\alpha(\theta)$. This is a graded loss: $U$ (Def.~\ref{def:gate}) charges every alteration, a substitution
+included, as a unit loss, so substitution leaves $U$ unchanged and lowers only this graded
+false-block loss. Without the prefix-safe rewrite and loss
+assumptions, only the class-equivalence statement remains; substitution need not
+improve an arbitrary task utility.
+\end{proof}
+
+\begin{remark}[Escalation]
+Replacing a block by an oracle that always returns a prefix-safe commit action is
+a special case of substitution (with the oracle's loss in place of
+$\ell_{\rm sub}$). The class conclusion needs the oracle to be part of the interface $\Pi$: an
+external oracle that decides $\Good(P)$ would let a trivial gate enforce every nonempty safety $P$,
+beyond $\RA[\Th;\Pi]$ (the safety boundary itself still holds by the limit-point argument). The
+utility conclusion is relative to that oracle model; no claim is made for a fallible or
+non-prefix-safe human decision.
+\end{remark}
+
+\subsection*{A.3\quad T2: enforcement under a fallible judge}
+For a one-step binary decision, let $F_1$ and $F_0$ be the laws of pre-commit
+information $I$ conditional on a violating and compliant proposal. A randomized
+block rule is a measurable $\varphi(I)\in[0,1]$. Its miss and false-block
+probabilities are $\beta(\varphi)=1-\E_1\varphi$ and
+$\alpha(\varphi)=\E_0\varphi$.
+
+\begin{lemma}[Neyman--Pearson optimality]\label{lem:np}
+Among all block rules measurable with respect to $I$ that have miss at most $\beta_0$, the minimum
+false-block probability is $\ROC_I(\beta_0)$, attained by a randomized
+likelihood-ratio threshold.
+\end{lemma}
+\begin{proof}
+Blocking a violation has probability $\Pdist[\block\mid\pi=1]=\E_1[\varphi]
+=1-\text{miss}$, and false-alarm is $\Pdist[\block\mid\pi=0]=\E_0[\varphi]$.
+The constraint is $\E_1\varphi\ge1-\beta_0$ and the objective is
+$\E_0\varphi$. This is the Neyman--Pearson
+program \citep{neyman1933problem,tong2018np}; its randomized likelihood-ratio
+solution has value $\ROC_I(\beta_0)$. Boundary randomization convexifies the
+error region, so $\beta\mapsto\ROC_I(\beta)$ is nonincreasing and convex.
+\end{proof}
+
+\noindent\textbf{Proposition~\ref{thm:frontier}} (Exogenous information frontier)\textbf{.}
+\emph{For a fixed one-step law, the exact frontier from information $I$ is
+$B_I^\star(\beta)=\ROC_I(\beta)$. If $I'$ Blackwell-refines $I$, then
+$\ROC_{I'}(\beta)\le\ROC_I(\beta)$ pointwise, with equality at every $\beta$ when the
+likelihood ratio of $I'$ is almost surely a function of $I$.}
+
+\begin{proof}
+The equality is Lemma~\ref{lem:np}. If $I$ is a garbling of $I'$, every
+$I$-measurable rule is implementable from $I'$ by applying the garbling first.
+Thus the feasible error region for $I'$ contains the one for $I$, giving the
+pointwise inequality. Conversely, if the likelihood ratio of $I'$ is almost surely a
+function of $I$, the randomized likelihood-ratio test attaining $\ROC_{I'}$
+(Lemma~\ref{lem:np}) is $I$-measurable, so $\ROC_{I'}=\ROC_I$ at every $\beta$. A strict gain
+thus needs label information in $I'$ beyond $I$; conditional dependence among judges alone
+does not guarantee it. When the likelihood ratio is a nondecreasing function of a score $s$, its
+level sets are $s$-intervals on which $dF_1=k\,dF_0$, so blocking the upper part of the boundary
+interval (randomizing only at an atom of $s$) has the same miss and false-block probability as
+randomizing over the whole level set: a threshold on $s$, randomized on ties, attains $\ROC_I$.
+\end{proof}
+
+\medskip
+\noindent\textbf{Corollary~\ref{cor:reduction}} (Continuation-neutral episode lift)\textbf{.}
+\emph{Under the product specialization of Assumption~\ref{ass:benign}, a stationary
+test with fresh per-step randomization has $R_H(\beta)=1-(1-\beta)^H$ on the
+all-violation stream and $R_H(\beta)=1-(1-q\beta)^H$ for i.i.d.\
+$\mathrm{Bernoulli}(q)$ labels. Within this product class,
+$B_{I,H}^\star(\delta)=\ROC_I(R_H^{-1}(\delta))$.}
+
+\begin{proof}
+The product formulas follow because ``a violation is committed'' has probability
+$\beta$ (or $q\beta$) independently at each step. Since the repeated test has
+per-step false-block probability $\alpha$, imposing $R_H(\beta)\le\delta$ is
+equivalent to $\beta\le R_H^{-1}(\delta)$; Proposition~\ref{thm:frontier} gives the optimum
+at the largest admissible miss. Shared episode-level randomization is excluded
+because it need not obey the product formula. Open-loop time-varying tests with per-step
+misses $\beta_t$ do no better: independence gives $R_H=1-\prod_t(1-q\beta_t)$ ($q=1$ on the
+all-violation stream), so $R_H\le\delta$ iff $\sum_t\gamma_t\le-\ln(1-\delta)$ with
+$\gamma_t=-\ln(1-q\beta_t)$. The per-step cost $f(\gamma)=\ROC_I\big((1-e^{-\gamma})/q\big)$ is
+convex, a convex nonincreasing function (Lemma~\ref{lem:np}) of a concave increasing one, so
+Jensen's inequality and monotonicity of $f$ give
+$\frac1H\sum_t f(\gamma_t)\ge f\big(\frac1H\sum_t\gamma_t\big)\ge f\big(-\ln(1-\delta)/H\big)
+=\ROC_I(R_H^{-1}(\delta))$ for $\delta\le R_H(1)$; for larger $\delta$ allow-all is feasible. History dependence can do strictly better even without
+feedback: with an uninformative score ($\ROC_I(\beta)=1-\beta$), $H\ge2$ and $0<\delta<R_H(1)$,
+blocking at step one with probability $1-\delta/R_H(1)$ and repeating that decision at every later
+step gives risk $\delta$ at per-step false-block probability $1-\delta/R_H(1)<1-R_H^{-1}(\delta)$,
+because $R_H$ is strictly concave, so $R_H^{-1}$ is strictly convex on $[0,R_H(1)]$ with
+$R_H^{-1}(0)=0$ and $R_H^{-1}(R_H(1))=1$. On the all-violation stream the per-step miss budget
+$R_H^{-1}(\delta)=1-(1-\delta)^{1/H}$ is at least the union-bound budget $\delta/H$ of Theorem~\ref{thm:conformal}, because
+$(1-\delta/H)^H\ge1-\delta$; the gap is what the product conditions buy.
+\end{proof}
+
+\medskip
+\noindent\textbf{Theorem~\ref{thm:sequential}} (Endogenous finite-model frontier)\textbf{.}
+\emph{For a specified finite model, the controlled frontier of
+Definition~\ref{def:controlled} is the image of
+a reachable-belief occupancy polytope; its lower boundary is convex and
+piecewise linear, its Lagrange dual is solved by belief-state Bellman recursion,
+and an optimum mixes at most two deterministic belief-Markov policies.}
+\begin{proof}
+Augment the latent state with an absorbing unsafe bit and let $r_t$ be one only
+on first entry, so $\sum_t r_t$ is the episode-unsafe indicator. With finite
+abstractions and finite $H$, finitely many observation histories and posteriors
+$b_t=\Pdist(X_t\mid h_t)$ are reachable. The posterior is policy-independent: the factors
+$\psi(D_s\mid h_s)$ in the joint law of $(X_{\le t},h_t)$ are functions of $h_t$ and cancel in Bayes'
+rule. Hence $b_{t+1}$ is a fixed function of $(b_t,D_t)$ and the next observation, whose conditional
+law given $(h_t,D_t)$ depends only on $(b_t,D_t)$, so $(b_t)$ is a controlled Markov chain with a
+policy-independent kernel, and $\E[c_t\mid h_t,D_t]$, $\E[r_t\mid h_t,D_t]$ depend on $h_t$ only through
+$b_t$. Belief is a sufficient controlled state:
+the conditional action probabilities of any perfect-recall policy define a
+belief-Markov policy with the same occupancy measure, hence the same $(R,C)$.
+
+Let $\zeta_t(b,d)$ be the probability of occupying belief $b$ and choosing $d$, and $K_t(b'\mid b,d)$
+the policy-independent belief transition kernel (the Bayes update after $d$ and the next observation).
+The nonnegative flow constraints are
+\[
+\begin{aligned}
+\sum_d \zeta_1(b,d)&=\Pdist[b_1=b],\\
+\sum_d \zeta_{t+1}(b',d)
+  &=\sum_{b,d}\zeta_t(b,d)K_t(b'\mid b,d).
+\end{aligned}
+\]
+Conversely, disintegrating a feasible flow gives a belief-Markov policy. Both
+$R$ and $C$ are linear in $\zeta$, proving the main occupancy program (if $\delta$ is below the least
+achievable $R$, the program is infeasible and $F_H(\delta)=+\infty$; the claims below concern feasible
+$\delta$). Its feasible
+set is a bounded polytope; its two-dimensional performance image is a compact
+convex polygon, with a convex piecewise-linear lower boundary.
+
+Finite LP duality gives
+\[
+\begin{aligned}
+F_H(\delta)
+  &=\max_{\lambda\ge0}\{\textstyle\sum_{b}\Pdist[b_1=b]\,V_1^\lambda(b)-\lambda\delta\},\\
+V_t^\lambda(b)
+  &=\min_d\{c_t(b,d)+\lambda r_t(b,d)\\[-2pt]
+  &\hspace{34mm}+\E[V_{t+1}^\lambda(b')\mid b,d]\}.
+\end{aligned}
+\]
+With $V^\lambda_{H+1}\equiv0$, a deterministic minimizer exists for each $\lambda$. Any constrained boundary
+point lies on a supporting segment of the performance polygon. Every endpoint
+vertex is the image of an extreme occupancy point, and extreme finite-horizon
+occupancy points are induced by deterministic belief-Markov policies. Hence
+sampling one endpoint policy once per episode implements the boundary point
+with support at most two.
+\end{proof}
+Comparing Bellman $Q$-values gives the dynamic rule in the main text:
+for $c_t=w_t\mathbf 1[\block,\text{compliant}]$ with $w_t$ fixed given $b_t$, and unsafe entry only via an
+allowed violation, blocking costs $w_t(1-p_t)$, allowing incurs $\lambda p_t$ (with the unsafe bit observed, so an
+allowed violation is a first entry), and rearranging
+$Q(\block)\le Q(\allow)$ yields
+$\lambda p_t-w_t(1-p_t)\ge\Gamma_t^\lambda$.
+
+\medskip
+\noindent\textbf{Proposition~\ref{prop:feedback}} (ROC does not identify a feedback frontier)\textbf{.}
+\emph{Two $H=2$ systems can have identical judge ROC and identical ungated trajectory law but different $F_H(0)$.}
+\begin{proof}
+Take $H=2$, a constant score that is the gate's only information about the labels, and $Y_1\sim\mathrm{Bernoulli}(q)$ with
+$0<q<1$. If step one is allowed, let $Y_2=0$ in both systems, so their ungated
+laws and ROCs coincide. If step one is blocked, system A has $Y_2=0$, while
+system B presents $Y_2\sim\mathrm{Bernoulli}(p)$, $0<p<1$. Zero risk forces a
+first-step block. A then need not block again, whereas B must. For expected
+compliant-block count, set $c_t=\mathbf{1}[\text{block and compliant}]$ and let
+$r_t$ indicate first unsafe entry as in Definition~\ref{def:controlled}. Then
+$F_A(0)=1-q$ and
+$F_B(0)=(1-q)+(1-p)$, proving non-identifiability. The constant score is not essential: if $F_0,F_1$ are not mutually singular, let $\kappa=1-\sup\{F_0(N):F_1(N)=0\}>0$; zero risk forces blocking an $F_1$-full set at every step that may violate, so $F_A(0)=(1-q)\kappa<(1-q)\kappa+(q+(1-q)\kappa)(1-p)\kappa=F_B(0)$.
+\end{proof}
+
+\medskip
+\noindent\textbf{Corollary~\ref{cor:no-estimator}} (Identification impossibility)\textbf{.}
+\emph{Over any model class containing systems A and B of Proposition~\ref{prop:feedback}, no estimator whose input is limited to ungated trajectories and static judge scores can uniformly identify $F_H(0)$, hence it cannot identify the full controlled frontier.}
+\begin{proof}
+Any estimator restricted to ungated trajectories and static scores has the
+same input law in systems A and B, but the target takes the distinct values
+$F_A(0)$ and $F_B(0)$. It therefore cannot identify both uniformly. Because
+$F_H(0)$ is one point of the controlled frontier, neither can it identify the
+full frontier.
+\end{proof}
+
+\medskip
+\noindent\textbf{Proposition~\ref{prop:explore}} (Exploratory blocking restores identification)\textbf{.}
+\emph{In the model of Definition~\ref{def:controlled}, let a logging gate choose $D_t$ from $h_t$
+with known probabilities $\mu(d\mid h_t)\ge\varepsilon>0$ for both decisions at every reachable
+history, and let the logs record $(h_t,D_t,c_t,r_t)$ at every step. Then for every randomized
+perfect-recall gate $\psi$, with $W_t=\prod_{s\le t}\psi(D_s\mid h_s)/\mu(D_s\mid h_s)\le\varepsilon^{-t}$,
+$R(\psi)=\E_\mu[\sum_tW_tr_t]$ and $C(\psi)=\E_\mu[\sum_tW_tc_t]$; hence the achievable $(R,C)$ set
+and $F_H(\delta)$ are identified.}
+\begin{proof}
+Write a logged trajectory as $\omega=(h_t,D_t,c_t,r_t)_{t\le H}$, where $h_{t+1}$
+appends the next observation to $(h_t,D_t)$, and let $\omega_{<t}$ be its prefix before $h_t$.
+Let $\nu$ be a gate whose decision at step $t$ is drawn from $\nu(\cdot\mid h_t)$ with
+randomization independent of everything else. By Definition~\ref{def:controlled}, the next
+state, observation, cost, and unsafe indicator depend on the past only through $(X_t,D_t)$, and
+$(c_t,r_t)$ are functions of $(X_t,D_t,X_{t+1})$. Let $G_t(\,\cdot\mid\omega_{<t},h_t,D_t)$ be
+the conditional law of $(c_t,r_t,h_{t+1})$ given the logged prefix and $(h_t,D_t)$. It is
+obtained by Bayes' rule from the initial law and the kernels, integrating over the posterior of
+the hidden states given $(\omega_{<t},h_t,D_t)$; the factors $\nu(D_s\mid h_s)$, $s\le t$, that
+appear in the joint law of the hidden states and the logged prefix are functions of the logged
+prefix alone and cancel in that posterior, so $G_t$ does not depend on $\nu$. Therefore
+\[
+  \Pdist_\nu(\omega)=\Pdist(h_1)\prod_{t}\nu(D_t\mid h_t)\,G_t(c_t,r_t,h_{t+1}\mid\omega_{<t},h_t,D_t).
+\]
+Fix $t$. The pair $(c_t,r_t)$ is a function of the logged prefix $\omega_{\le t}$ ending with
+$(c_t,r_t)$, whose law under $\nu$ is the product above truncated at $t$. Since
+$\mu(d\mid h)\ge\varepsilon>0$ at every reachable $h$, $\Pdist_\psi(\omega_{\le t})>0$ implies
+$\Pdist_\mu(\omega_{\le t})>0$, and the likelihood ratio is
+$\Pdist_\psi(\omega_{\le t})/\Pdist_\mu(\omega_{\le t})=W_t$ because the common factors
+$\Pdist(h_1)$ and $G_s$ cancel. Hence $\E_\psi[r_t]=\E_\mu[W_tr_t]$ and
+$\E_\psi[c_t]=\E_\mu[W_tc_t]$; summing over $t$ gives both identities. Each identity holds for
+every $\psi$, so the map $\psi\mapsto(R(\psi),C(\psi))$, its image, and
+$F_H(\delta)=\inf\{C(\psi):R(\psi)\le\delta\}$ are functionals of the logging law. Each factor
+$\psi(D_s\mid h_s)/\mu(D_s\mid h_s)$ is at most $1/\varepsilon$, so $W_t\le\varepsilon^{-t}$. By the two identities, the average of
+$\sum_tW_tr_t$ (resp.\ $\sum_tW_tc_t$) over i.i.d.\ logged episodes is unbiased for $R(\psi)$ (resp.\
+$C(\psi)$). The weight bound is attained, so the variance can grow exponentially in $H$: if
+$\varepsilon\le1/2$, $\psi$ is deterministic, $\mu$ gives $\psi$'s choice probability exactly
+$\varepsilon$ at every history, and $c_t=\mathbf 1[t=H]$, then $\sum_tW_tc_t=W_H$ equals
+$\varepsilon^{-H}$ with probability $\varepsilon^{H}$ and $0$ otherwise, so its variance is
+$\varepsilon^{-H}-1$.
+Episode-level mixtures of such gates (as in Theorem~\ref{thm:sequential}) attain the
+corresponding convex combinations of identified $(R,C)$ pairs, so they are identified as well.
+\end{proof}
+
+\medskip
+\noindent\textbf{Theorem~\ref{thm:conformal}} (Distribution-free safety certificate)\textbf{.}
+\emph{Under Assumption~\ref{ass:benign}, calibrating the threshold by conformal
+risk control on violating examples to hold the per-step conditional miss risk
+$r(\theta)=\Pdist[\allow\mid\text{violation}]$ at $\delta/H$ yields
+$\Pdist[\text{unsafe episode}]\le\delta$ marginally over deployment episodes and the
+calibration draw, finite-sample and distribution-free under per-step
+exchangeability.}
+
+\begin{proof}
+Let $V_t$ be the event that step $t$ proposes a violation, with score $s_t$; the gate
+allows it iff $s_t<\hat\theta$, where the calibrated threshold $\hat\theta$ is a function
+of the calibration sample. An unsafe episode commits a violation at some step (a block commits no effect, and by
+Assumption~\ref{ass:benign} committing a compliant proposal keeps the effect prefix in $\Good(P)$), so by the
+\emph{union bound}, without conditioning on $\hat\theta$,
+\begin{align*}
+  \Pdist[\text{unsafe}]
+  &\le\sum_{t\le H}\Pdist[V_t]\,\Pdist[s_t<\hat\theta\mid V_t]\\
+  &\le H\max_{t\le H}\Pdist[s_t<\hat\theta\mid V_t],
+\end{align*}
+using $\Pdist[V_t]\le1$. Fix $t$ and condition on $V_t$. By label-conditional per-step
+exchangeability (Assumption~\ref{ass:benign}), the $n$ violating calibration scores and
+$s_t$ form an exchangeable $(n+1)$-tuple. The miss loss $\mathbf{1}[s<\theta]$ is bounded
+and nondecreasing in $\theta$ (raising the threshold blocks fewer actions);
+reparameterizing by $\lambda=-\theta$ makes it nonincreasing. Conformal risk
+control \citep{angelopoulos2024conformal} at level $\delta/H$ on this tuple gives
+$\Pdist[s_t<\hat\theta\mid V_t]\le\delta/H$, jointly over the calibration draw and the
+step-$t$ proposal. (Equivalently, for $\hat\theta$ the $k$-th smallest calibration score
+with $k=\lfloor(n+1)\delta/H\rfloor$, exchangeability of ranks gives
+$\Pdist[s_t<\hat\theta\mid V_t]\le k/(n+1)$, ties included; $k=0$ means block-all.) The
+exchangeability required is \emph{label-conditional} (Mondrian): since the miss is
+calibrated on the \emph{violating} subpopulation, the violating calibration examples must
+be exchangeable with the violating deployment steps, as required by
+Assumption~\ref{ass:benign}, not merely jointly exchangeable before conditioning on the
+label. Hence $\Pdist[\text{unsafe}]\le H\cdot\delta/H=\delta$, which is the stated
+marginal guarantee. The argument never conditions on $\hat\theta$: without independence
+between deployment and calibration, $\hat\theta$ can carry information about the
+deployment law, so the conditional form $\Pdist[\text{unsafe}\mid\hat\theta]\le
+H\,r(\hat\theta)$ with $\E[r(\hat\theta)]\le\delta/H$, for the population miss
+$r(\theta)=\Pdist[\allow\mid\text{violation}]$, is justified when deployment
+steps are drawn independently of the calibration sample (as in
+Theorem~\ref{thm:adv}) but can fail otherwise. Nothing in this argument bounds the
+finite-sample threshold's distance from the population ROC optimum.
+\end{proof}
+
+\medskip
+The certificate is marginal over violation types: if a type makes up a fraction
+$q$ of violations, its own per-step miss is guaranteed only to be at most $\delta/(Hq)$,
+since $\Pdist[\allow\mid\text{violation},\text{type}]\le
+\Pdist[\allow\mid\text{violation}]/q$. Calibrating separately per policy or per
+argument role, as concurrent work does for tool-call fields \citep{rahman2026role},
+refines this at the cost of more calibration violations per stratum.
+
+\medskip
+\noindent\refstepcounter{proposition}\textbf{Proposition~\theproposition} (Episode-level certificate, no $H$-penalty)\textbf{.}
+\emph{If decisions alter neither later proposals nor their labels and scores (open loop) and a calibration set of whole
+episodes is exchangeable with deployment
+episodes, calibrating the threshold by conformal risk control on the monotone
+episode loss $L(\text{ep})=\mathbf{1}[\text{some step allows a violation}]$ (violations as in
+Assumption~\ref{ass:benign}) to level
+$\delta$ gives $\Pdist[\text{unsafe episode}]\le\delta$ with no factor of $H$.}
+
+\begin{proof}
+The union-bound step above pays a factor $H$ because it controls each per-step risk
+separately. Instead treat the whole episode as one calibration unit. The loss
+$L(\text{ep};\theta)=\mathbf{1}[\exists t\le H:\text{a violation at }t\text{ scores
+below }\theta]$ is equivalently
+\[
+L(\text{ep};\theta)
+=\mathbf{1}\!\left\{\min_{t:Y_t=1}s_t<\theta\right\},
+\]
+with the minimum over an empty set defined as $+\infty$. It is bounded in
+$[0,1]$ and \emph{nondecreasing} in $\theta$ (raising
+$\theta$ blocks weakly \emph{fewer} actions, so it never turns a missed violation into a
+caught one; this uses the open-loop hypothesis, since under feedback the gated episode's
+unsafe indicator can be non-monotone in $\theta$). Reparameterizing by $\lambda=-\theta$
+makes it a non-increasing admissible
+loss for conformal risk control \citep{angelopoulos2024conformal}, which, on an
+exchangeable episode calibration set, returns $\hat\theta$ with $\E[L(\hat\theta)]\le\delta$. Since
+$\Pdist[\text{unsafe episode}\mid\hat\theta]=\E[L(\text{ep};\hat\theta)\mid\hat\theta]$,
+taking the calibration expectation gives $\Pdist[\text{unsafe episode}]\le\delta$
+directly. The price is that exchangeability is now required at the episode level
+(episodes i.i.d.\ or exchangeable), stronger than the per-step version but free of
+the $H$-fold tightening, which matters when $H$ is large.
+\end{proof}
+
+\medskip
+\noindent\refstepcounter{proposition}\textbf{Proposition~\theproposition} (General region is copula-bounded)\textbf{.}
+\emph{For the conservative any-flag gate and fixed marginal error rates,
+Fr\'echet--Hoeffding bounds bracket the step-level miss for a specified violated
+predicate set and the false-block probability on compliant actions. At a fixed
+threshold vector the bounds are sharp for every $m$: each pair in the product of the
+two intervals is attained by some choice of class-conditional couplings. At $m=1$
+they equal the one-judge errors.}
+
+\begin{proof}
+Take the conservative gate that blocks when any judge flags. A violation with true
+hazard on predicate set $S$ is committed iff no judge flags it, an event contained in
+$\bigcap_{i\in S}M_i$ (every relevant judge misses) with $\Pdist[M_i]=\beta_i$, and equal
+to it when $S=\{1,\ldots,m\}$, e.g., under the single predicate of
+Assumption~\ref{ass:benign} (for $|S|<m$ only the upper miss bound below applies); a compliant action is altered iff
+some judge false-alarms, $\bigcup_i E_i$ with $\Pdist[E_i]=\alpha_i$. For fixed
+marginals the Fr\'echet--Hoeffding inequalities give
+\[
+  \max\big(0,{\textstyle\sum_{i\in S}}\beta_i-|S|+1\big)
+   \le\Pdist\big[{\textstyle\bigcap_{i\in S}}M_i\big]\le\min_{i\in S}\beta_i,
+\]
+\[
+  \max_i\alpha_i\le\Pdist\Big[{\textstyle\bigcup_i}E_i\Big]
+   \le\min\!\Big(1,{\textstyle\sum_i}\alpha_i\Big),
+\]
+which hold for every coupling of the errors. Each endpoint is attained by an
+explicit coupling, for every $m$. Realize the error indicators of a class as arcs
+of the unit circle under a uniform point. Nested arcs $M_i=[0,\beta_i)$ and
+$E_i=[0,\alpha_i)$ (the comonotone coupling) attain the intersection upper bound
+$\min_{i\in S}\beta_i$ and the union lower bound $\max_i\alpha_i$. Placing the
+complements $M_i^{c}$ as consecutive arcs of lengths $1-\beta_i$, wrapping around the
+circle when necessary, gives
+$\Pdist[\bigcap_{i\in S}M_i]=\max(0,\sum_{i\in S}\beta_i-|S|+1)$; placing the $E_i$
+as consecutive arcs of lengths $\alpha_i$ gives
+$\Pdist[\bigcup_iE_i]=\min(1,\sum_i\alpha_i)$. No $m$-variate countermonotone
+copula is needed (none exists for $m\ge3$), because each quantity is the
+probability of a single event. Misses are defined on the violation class and false
+alarms on the compliant class, so the two couplings are chosen independently, and
+mixing two couplings within a class attains every intermediate value. The
+threshold-varying question is different: one coupling of the score vector must serve
+every threshold vector at once, and for $m\ge3$ the pointwise extremes need not be
+simultaneously attainable (Supplement~B.16, O1). An episode lift additionally
+requires specified temporal dependence; only under Cor.~\ref{cor:reduction}'s
+product conditions may these step probabilities be inserted into its product
+formula. For $m=1$ both bounds equal $(\alpha_1,\beta_1)$.
+\end{proof}
+
+\medskip
+\noindent\textbf{Theorem~\ref{thm:adv}} (Adversarial deployment bound)\textbf{.}
+\emph{Under Assumption~\ref{ass:benign}, with conformal calibration on benign
+data and a budget-$\rho$ adversary acting at deployment, on steps drawn independently of
+the calibration sample and with the violating proposals generated under attack (before
+perturbation) satisfying Assumption~\ref{ass:benign}, the calibrated gate satisfies
+$\Pdist[\text{unsafe episode}]\le\min\{1,\delta+H\bar\eta(\rho)\}$ marginally over the calibration draw. Conditional on a fixed
+threshold, an attained-margin independent product construction realizes
+$1-(1-\min\{1,\beta(\theta)+\eta(\rho;\theta)\})^H$.}
+
+\begin{proof}
+\emph{Upper bound.} Calibration is performed on the benign exchangeable sample;
+the representation adversary acts only at deployment, on steps drawn independently
+of the calibration sample, so that conditioning on $\hat\theta$ leaves each step's
+benign miss risk equal to $r(\hat\theta)$. (Without independence, the per-step
+guarantee of Theorem~\ref{thm:conformal} still holds marginally, because conformal risk control is itself a marginal
+guarantee; the margin argument below needs the conditional form.) By
+Def.~\ref{def:adversary}, $\bar\eta(\rho)$ upper-bounds the
+per-step increase in the conditional miss risk \emph{at every threshold}, so under any
+budget-$\rho$ adversary the risk at the calibrated $\hat\theta$ is at most
+$r(\hat\theta)+\bar\eta(\rho)$. The union bound of the certificate proof, conditioning on
+$\hat\theta$, gives $\Pdist[\text{unsafe}\mid\hat\theta]\le\sum_{t\le H}(r(\hat\theta)+\bar\eta(\rho))
+=H\,r(\hat\theta)+H\bar\eta(\rho)$; taking the calibration expectation and using
+$\E[r(\hat\theta)]\le\delta/H$ (conformal risk control) yields the marginal
+$\Pdist[\text{unsafe episode}]\le\min\{1,\delta+H\bar\eta(\rho)\}$.
+\emph{Sharpness construction.} Fix $\theta$ and suppose a representation adversary
+attains the defining supremum, so its conditional miss is
+$x=\min\{1,\beta(\theta)+\eta(\rho;\theta)\}$. On an all-violation product stream,
+choose its perturbation randomness independently across steps. The probability
+that no violation is committed is $(1-x)^H$, giving exactly
+$1-(1-x)^H$. If the supremum is not attained, the same risks are approached with
+$\eta-\varepsilon$. This demonstrates first-order sharpness of the union bound
+under a stated construction; it is not a lower bound for every adversary or
+feedback process.
+\emph{Non-transfer.} Conformal validity requires the deployment steps to be
+exchangeable with the calibration sample; a budget-$\rho$ adversary changes the
+input distribution, so the \emph{attacked} per-step miss need not satisfy the $\delta/H$
+bound (the benign $\E[r(\hat\theta)]\le\delta/H$ still holds) and the bare
+$\delta$ bound is void unless $\eta$ absorbs the shift.
+\end{proof}
+
+\medskip
+\noindent\textbf{Proposition~\ref{prop:zero-miss}} (Distributional zero-miss price)\textbf{.}
+\emph{For any attainable adversarial violation-score law $Q_\rho$, every
+score-measurable gate with zero $Q_\rho$-miss has utility loss
+\[U\ge1-\sup\{F_0(N):Q_\rho(N)=0\};\]
+if $F_0\ll Q_\rho$, this distributional
+zero-miss cost is one.}
+\begin{proof}
+Let $Q_\rho$ be any attainable score law
+induced on violations and $F_0$ the compliant score law. Fix a score-measurable
+gate with zero miss under $Q_\rho$. For a deterministic gate the blocked set
+$B$ has $Q_\rho(B)=1$; for a randomized gate the same argument applies to its
+block-probability function and yields the identical variational value. Its utility loss is the
+compliant mass it over-blocks, $U(g)=F_0(B)$, and over all zero-miss gates
+\begin{align*}
+  U(g)\ &\ge\ \inf\{F_0(B):Q_\rho(B)=1\}\\
+        &=\ 1-\sup\{F_0(N):Q_\rho(N)=0\},
+\end{align*}
+using $F_0(B)=1-F_0(B^{c})$ with $B^{c}$ ranging over the $Q_\rho$-null sets. This is an
+\emph{absolute-continuity} (Lebesgue-decomposition) bound, sharper and correct where a raw support-overlap
+bound is not: a zero-miss gate may leave unblocked only the part of the compliant law
+\emph{singular} to $Q_\rho$. By the Lebesgue decomposition $F_0=F_0^{\mathrm{ac}}+F_0^{\mathrm{sing}}$
+relative to $Q_\rho$, $U(g)\ge F_0^{\mathrm{ac}}(\mathbb{R})=1-F_0^{\mathrm{sing}}(\mathbb{R})$.
+Hence if $F_0\ll Q_\rho$ (no compliant mass on any $Q_\rho$-null set) then $U(g)=1$:
+block-everything is the only distributionally zero-miss score rule. This is not
+the universal streamwise soundness of Def.~\ref{def:gate}. We emphasize that
+$\eta(\rho;\theta)\ge1-\beta(\theta)$ is \emph{not} sufficient for domination:
+it drives the adversarial miss to one at that threshold, but says nothing about
+whether $F_0$ is dominated by $Q_\rho$ ($F_0$
+may still place mass on $Q_\rho$-null sets, e.g., high-scoring compliant actions). What
+approaches $F_0\ll Q_\rho$ is empirical: in the safe-washing runs the adversary drives $Q_\rho$
+onto the low scores where the LLM judges already place compliant actions, so the $Q_\rho$-absolutely-continuous compliant mass
+$1-\sup\{F_0(N):Q_\rho(N)=0\}$ is large and the zero-miss gate's over-block $U$ is near $1$; we
+report the measured $U$ rather than assume total absolute continuity.
+\end{proof}
+
+\medskip
+\noindent\textbf{Corollary~\ref{cor:robust}} (Robust calibration)\textbf{.}
+\emph{If a uniform margin $\bar\eta(\rho)<\delta/H$ has been verified, calibrating on
+benign exchangeable violations to the per-step target
+$\delta/H-\bar\eta(\rho)$ yields $\Pdist[\text{unsafe episode}]\le\delta$ (marginal over the calibration
+draw) under any budget-$\rho$ representation adversary at deployment, under the
+conditions of Theorem~\ref{thm:adv}. At the population
+optimum the frontier price is
+$\ROC_I(\delta/H-\bar\eta(\rho))-\ROC_I(\delta/H)$; finite-sample calibration may pay
+additional conservatism (Proposition~\ref{prop:zero-miss} prices distributional zero miss).}
+
+\begin{proof}
+Run the same split-conformal calibration but against the tightened per-step target
+$\tau'=\delta/H-\bar\eta(\rho)>0$, so the benign per-step miss satisfies
+$\E[r(\hat\theta)]\le\tau'$ over the calibration draw (the miss at a given calibrated
+threshold can exceed $\tau'$). By
+Def.~\ref{def:adversary} a budget-$\rho$ adversary raises the per-step conditional miss at
+\emph{any} threshold by at most $\bar\eta(\rho)$, to at most $r(\hat\theta)+\bar\eta(\rho)$,
+whose calibration expectation is at most $\tau'+\bar\eta(\rho)=\delta/H$. The
+union bound of the upper part, conditional on $\hat\theta$ and then averaged over the
+calibration draw, gives $\Pdist[\text{unsafe}]\le\sum_{t\le H}\delta/H=\delta$,
+for \emph{any} budget-$\rho$ adversary since the per-step bound is worst-case.
+At the population optimum, changing the miss target from $\delta/H$ to $\tau'$
+changes false-block cost by
+$\ROC_I(\tau')-\ROC_I(\delta/H)$. A threshold selected from a finite calibration
+sample can lie above this envelope, so equality of its realized cost is not
+claimed. If the tightened target is non-positive, this procedure falls back to
+block-all; the separate domination condition $F_0\ll Q_\rho$ is what forces unit
+cost for distributional zero-miss.
+\end{proof}
+
+\subsection*{A.4\quad T3: the decidability boundary}
+\noindent\textbf{Proposition~\ref{thm:undec}} (Specification analysis is undecidable)\textbf{.}
+\emph{Enforcement is constructive once a nonempty policy is given as a $\Th$-representable
+safety automaton (T1); static analysis of an arbitrary specification is not. There is a guard
+theory $\Th^{\ast}$ (equality plus two global $\mathbb N$-counters with
+increment, guarded decrement, and zero-test)
+for which reachability of a designated bad state in a deterministic, trim register automaton is
+undecidable; consequently deciding whether a specified data-word policy is nontrivial (has a
+bad prefix, i.e., ever fires), the basic sanity check a policy DSL's linter would run, is
+undecidable.}
+
+\begin{proof}
+A two-counter Minsky machine $M$ has counters $c_1,c_2\in\mathbb{N}$ and a finite
+program of labeled instructions of three forms,
+\[
+\begin{aligned}
+&\ell:\ c_j\mathbin{+{+}};\ \mathrm{goto}\ \ell',\\
+&\ell:\ \text{if }c_j=0\text{ goto }\ell'\text{ else }c_j\mathbin{-{-}};\ \mathrm{goto}\ \ell'',
+\end{aligned}
+\]
+and a halt instruction. Whether $M$, started from $c_1=c_2=0$ at its initial
+label, reaches its halt instruction is undecidable.
+
+Build a deterministic register automaton $\mathcal A$ over $\Th^{\ast}$ as follows.
+Its finite control is the set of $M$'s labels plus an absorbing good sink $G$;
+it has two global $\mathbb N$-counters $r_1,r_2$ initialized to $0$; and the
+alphabet has exactly two effect actions, the nullary $\mathsf{tick}$ and $\mathsf{safe}$ ($\noop$ leaves the state unchanged, A.1). On each
+$\mathsf{tick}$, $\mathcal A$ executes the instruction at the current label: an
+increment instruction updates $r_j\mathrel{+}=1$ and moves to $\ell'$; a
+test-and-decrement instruction uses the $\Th^{\ast}$ zero-test guard $r_j=0$ to
+branch to $\ell'$, or otherwise updates $r_j\mathrel{-}=1$ and moves to
+$\ell''$. From every nonbad machine label, $\mathsf{safe}$ moves to $G$, where
+both actions loop. These updates and guards are exactly the operations of
+$\Th^{\ast}$, and $\mathcal A$ is deterministic because $M$ is. Designate
+$M$'s halt label as the absorbing bad state $B$.
+
+Because $M$ is deterministic and requires no input, the run of $\mathcal A$ on the
+infinite $\mathsf{tick}$ stream faithfully simulates $M$: after $n$ ticks its
+configuration $(\text{label},r_1,r_2)$ equals $M$'s configuration after $n$ steps.
+Hence a finite $\mathsf{tick}$-prefix reaches $B$ iff $M$ halts, so bad-state
+reachability in $\mathcal A$ is undecidable. The induced policy $P$ has a bad
+prefix, i.e., is nontrivial (rules out at least one finite behavior), iff $B$ is
+reachable iff $M$ halts. Assuming w.l.o.g.\ that $M$'s initial label is not its halt label (such machines halt trivially), $P$ is always nonempty, since taking
+$\mathsf{safe}$ before $B$ yields an infinite run in $G$, and every nonbad
+prefix has such a safe continuation, so $\mathcal A$ is trim. Enforcing this constructed
+$\Th^{\ast}$-automaton is therefore still constructive
+(T1); what is undecidable is the static question of whether an arbitrary such specification is
+non-vacuous, so no DSL linter can decide it over $\Th^{\ast}$.
+\end{proof}
+\noindent\emph{Trimness is undecidable for $\Th^{\ast}$.} Drop the $\mathsf{safe}$ action and make the
+halt label a non-bad dead end from which every action enters a fresh absorbing bad state. Every reachable non-halt
+configuration keeps a non-bad $\mathsf{tick}$ successor, so the automaton is trim (\S\ref{sec:model})
+iff the halt label is unreachable, i.e., iff $M$ does not halt.
+
+\medskip
+\noindent\textbf{Theorem~\ref{thm:frag}} (A decidable, expressive fragment)\textbf{.}
+\emph{Over an infinite equality-data sort and a separate binary-encoded
+$\mathbb N$ amount sort, for the fragment $\Th_0$ of finite, separable, disjunctive products of total equality-register
+components (E), uniform independent key-local monotone-counter components (K),
+and one finite monotone counter-vector component (V), bad-prefix reachability is
+\PSPACE-complete, and \PSPACE-hard already for one (E) component; without (E) components, with keys over the
+equality sort, and if every amount atom is a cap check, it is \textsc{np}-complete (Proposition~\ref{prop:core}). Cap
+saturation is exact for (K,V), one-witness projection is exact for (K), and the
+finite abstraction is searched on the fly. For trim specifications (\S\ref{sec:model}), online enforcement is polynomial per
+step in the specification, current-action encoding, and $\log$ of the number of
+stored keys; with saturated counters,
+bit-space is linear in stored data encodings plus per-key local abstract states.}
+
+\begin{proof}
+\emph{Exact saturation.} For counter $x$, let $C_x$ be the greatest constant
+against which $x$ or $x+v$ is compared (or $0$ if none) and define
+$\sigma_x(n)=\min\{n,C_x+1\}$. Because every update is nonnegative, values above
+$C_x$ never return below it. For each supplied amount field $v$, let $C_v$ be
+the largest $C_x$ among counters whose guards or updates use that field, guess
+the \emph{single} category $\tau_v(v)=\min\{v,C_v+1\}$, and derive every
+counter-specific category as $\min\{\tau_v(v),C_x+1\}$. Thus all uses represent
+one concrete amount, rather than independent per-counter guesses. Every allowed atomic guard
+$x\bowtie c$ or $x+v\bowtie c$ has the same truth value for all concrete
+valuations with the same abstraction, and abstract addition
+$\sigma_x(\sigma_x(x)+\min\{\tau_v(v),C_x+1\})$ exactly matches concrete addition followed
+by $\sigma_x$. Boolean combinations and deterministic transitions therefore
+preserve this equivalence. A (V) component with $k$ counters has at most
+$|Q|\prod_x(C_x+2)$ abstract configurations. One transition may update several
+counters, but each atomic guard still compares one counter (or that counter
+plus the supplied amount) with a constant.
+
+\emph{One-witness projection.} A (K) component has a local finite state and
+counter vector for each key, initialized identically; an action naming $k$ reads
+and updates only the component at $k$, and the component rejects iff some local
+copy reaches its absorbing bad state. If a concrete run rejects, project the
+subsequence of actions naming the first rejecting key: locality makes this
+exactly a one-key rejecting run (actions naming no key update no local copy and are dropped).
+Conversely, rename the key in any one-key
+rejecting run to a fresh concrete key to obtain a global rejecting run. Thus
+bad-prefix reachability is equivalent to reachability in one saturated local
+copy, not merely over-approximated.
+
+\emph{Equality and products.} Because the equality-data sort is infinite, an
+(E) component has the standard finite equality-type abstraction for its
+registers and current data; its nonemptiness problem is
+decidable \citep{kaminski1994finite}, and in polynomial space by the on-the-fly search below, since each equality type has a polynomial-size encoding. Nonemptiness of register automata is itself \PSPACE-complete \citep{demri2009ltl}, so the (E) components add no complexity beyond that class. Every component is
+total over the common alphabet: guards partition the input valuations and any
+missing case is completed to its absorbing bad state. Separability excludes
+cross-component guards and assumptions. Hence a word rejecting in one
+component is executable by every other component and rejects the disjunctive
+product; conversely every product rejection has such a witness component.
+One may therefore nondeterministically select a component and search its
+implicit abstract graph. A node stores finite control, equality type, and each
+saturated counter in binary; a successor guesses the finite action/equality
+type and one capped category per supplied amount field, shared across every
+use of that field. The graph can be exponential
+because constants are binary, but reachability uses polynomial space by an
+on-the-fly counter bounded by the number of abstract nodes. By
+\textsc{npspace}=\textsc{pspace}, nontriviality is in \textsc{pspace}.
+
+\emph{Hardness.} Let $L\in\PSPACE$ be decided by a deterministic Turing machine $M$ with states
+$Q$ and tape alphabet $\Gamma$ in space $p(n)$; we assume $M$ never leaves cells $1,\ldots,p(n)$.
+Given $x$, build in polynomial time one total deterministic (E) component $\mathcal A_x$ over a
+single unary action type, with registers $z_\gamma$ ($\gamma\in\Gamma$) and $y_1,\ldots,y_{p(|x|)}$; their number is part of the input and, as in \citet{demri2009ltl} but unlike the pairwise-distinct registers of \citet{kaminski1994finite}, two registers may hold equal data.
+The first $|\Gamma|$ actions store pairwise distinct data in the $z_\gamma$, and the next $p(|x|)$
+actions store in $y_i$ a datum equal to $z_{\gamma_i}$, where $\gamma_1\cdots\gamma_{p(|x|)}$ is $x$
+padded with blanks. The control then holds $M$'s state $q$ and head position $h$. Let $\gamma$ be
+the symbol with $y_h=z_\gamma$ (an equality guard) and $(q',\gamma',\pm1)$ the move of $M$ on
+$(q,\gamma)$. An action whose datum equals $z_{\gamma'}$ stores it in $y_h$ and moves the control to
+$(q',h\pm1)$. Every other datum, i.e., a repeated value during setup or a wrong symbol, leads to an
+absorbing good sink, as do $M$'s rejecting states, while $M$'s accepting state is the bad state.
+Guards thus partition every input, so $\mathcal A_x$ is total, deterministic given the datum's
+equality type, trim, and nonempty. It has $|\Gamma|+p(|x|)$ registers and
+$O(|\Gamma|+p(|x|)+|Q|\,p(|x|))$ control states, and its bad state is reachable iff $M$ accepts $x$.
+Bad-prefix reachability is therefore \PSPACE-hard already for a single (E) component (cf.\ the
+\PSPACE-completeness of register-automaton nonemptiness \citep{demri2009ltl}), and $\Th_0$
+nontriviality is \PSPACE-complete.
+
+\emph{Runtime cost.} The T1 gate stores $\sigma_x(x)$, not an unbounded concrete
+counter, and maintains a balanced dictionary from each encoded key to its local
+finite state and saturated counter vector. On an action of bit length $L$, it
+reads each supplied amount once, computes its shared capped category, looks up
+the touched key using $O(\log n)$ encoded-key comparisons, evaluates the guard
+partition, and performs saturated updates. Time is polynomial in $L$ and the
+specification, with the stated $\log n$ dictionary factor. If a saturated local
+state needs $s$ bits, total (K) storage is
+$O(\sum_{k\ {\rm seen}}|k|+ns)$ bits, plus the bounded E-register encodings and
+fixed V abstract state. This is the claimed linear dependence on stored
+encodings, not a unit-cost claim for arbitrary-precision values or hashing.
+
+\emph{Expressiveness.} We exhibit each policy as a deterministic $\Th_0$
+automaton with absorbing bad state.
+\emph{Authenticate-before-access}: a control flag $\mathit{auth}$ and an
+equality register $\mathit{prin}$ storing the authenticated principal; the
+$\mathsf{authenticate}(p)$ action sets $\mathit{auth}$ and $\mathit{prin}:=p$; an
+$\mathsf{access}$ by requester $q$ takes the bad transition unless $\mathit{auth}$
+holds and $q=\mathit{prin}$ (an equality guard).
+\emph{Per-recipient spend cap}: one monotone accumulator $s_k$ per recipient
+key $k$ (stored in the balanced key dictionary); $\mathsf{pay}(k,v)$ with a nonnegative integer amount
+$v$ takes the bad transition if $s_k+v>c$ and otherwise updates $s_k\mathrel{+}=v$, an
+add-nonnegative-amount update and a compare-to-constant guard, both in $\Th_0$. Static
+decidability applies the exact-saturation abstraction (exact up to the cap $c$, then absorbing
+at $c{+}1$) to the single representative key, since distinct keys evolve independently, so ``some
+key exceeds its cap'' is reachable iff it is reachable for one key. P2 uses the
+same monitor with composite key $(k,w)$ when a trusted clock adapter attaches
+the day bucket $w$.
+\emph{Rate limit $r$ per supplied bucket}: key a monotone accumulator by
+the action's composite $(k,w)$ field; its $(r{+}1)$-th action takes the bad
+transition. The automaton enforces this policy for every supplied bucket
+sequence and assumes no ordering between bucket identifiers. Interpreting
+$w$ as a wall-clock window additionally requires a trusted adapter to attach
+$w=\lfloor t/W\rfloor$; that adapter is outside $\Th_0$, rather than an
+unstated trace assumption. No decrement or reset is needed because a new
+bucket is a fresh key.
+\emph{No-send-after-revoke}: a boolean control flag set by $\mathsf{revoke}$;
+$\mathsf{send}$ takes the bad transition once the flag is set.
+\emph{Fixed-vector global quotas}: a (V) component keeps one counter per
+resource class, may test a proposed nonnegative amount against the corresponding
+remaining cap, and adds the tested amount to each tested coordinate (possibly also to other coordinates). This permits coupling
+within the declared finite vector but never allocates or compares counters for
+unboundedly many data keys.
+\end{proof}
+
+\begin{proposition}[Policy inclusion and redundancy]\label{prop:incl}
+Let $\mathcal A,\mathcal B$ be trim $\Th_0$ specifications of policies $P_{\mathcal A},P_{\mathcal B}$ over a common alphabet, where $\mathcal A$ has no (K) component
+and registers, keys and equality guards range over the equality sort (amount fields are read only by counter guards and updates).
+Deciding $P_{\mathcal A}\subseteq P_{\mathcal B}$, i.e., whether rule $\mathcal B$ is redundant given $\mathcal A$ ($P_{\mathcal A}\cap P_{\mathcal B}=P_{\mathcal A}$), is \PSPACE-complete,
+and \PSPACE-hard already when $\mathcal A$ allows every action and $\mathcal B$ is one (E) component. Inclusion for $\mathcal A$ with a (K) component is not covered.
+\end{proposition}
+\begin{proof}
+\emph{Reduction.} For any $P$, $u\in\Good(P)$ iff $uy\in P$ for some $y$; as $P_{\mathcal B}$ is safety, $P_{\mathcal A}\subseteq P_{\mathcal B}$ iff
+$\Good(P_{\mathcal A})\subseteq\Good(P_{\mathcal B})$ iff $P_{\mathcal A}\cap P_{\mathcal B}=P_{\mathcal A}$, i.e., adding rule $\mathcal B$ changes no decision of the T1 gate.
+By trimness, $\Good(P_{\mathcal A})$ ($\Good(P_{\mathcal B})$) is the set of words on which no component of $\mathcal A$ ($\mathcal B$) enters a bad state, and
+$\mathcal B$ rejects iff some component $\mathcal B_j$ does. So inclusion fails iff, for some $j$, some word keeps every component of $\mathcal A$ non-bad
+while $\mathcal B_j$ enters a bad state. By the typing hypothesis, equality types and amount categories never constrain the same value.
+\emph{Product search.} Fix $j$. If $\mathcal B_j$ is a (K) component, add an analysis-only register tuple $r^\ast$, never assigned, whose initial
+equality type relative to the initial register contents is guessed, and track only the local copy of key $r^\ast$: it starts in the initial local
+state and is updated exactly by the actions whose key equals $r^\ast$. A node stores the control states of all components of $\mathcal A$ and of
+$\mathcal B_j$ (or of the $r^\ast$ copy), the joint equality type of all their registers and $r^\ast$, and every counter, saturated as in the proof of
+Theorem~\ref{thm:frag}; each amount field $v$ gets one shared category $\min\{v,C_v+1\}$, with $C_v$ the largest $C_x$ over counters $x$ of
+$\mathcal A$ or $\mathcal B_j$ that use $v$. A successor guesses an action type, the equality type of its data relative to the registers and $r^\ast$, and
+the amount categories; it is discarded if a component of $\mathcal A$ enters a bad state, and accepting if $\mathcal B_j$ (its $r^\ast$ copy) does.
+\emph{Exactness.} Saturation preserves the truth value of every atom $x\bowtie c$ and $x+v\bowtie c$ of either specification and commutes with
+the nonnegative updates (proof of Theorem~\ref{thm:frag}). Over the infinite equality sort, fresh values realize every consistent type sequence,
+and all register, key and $r^\ast$ tests are equalities. If a word keeps $\mathcal A$ non-bad while the copy of $\mathcal B_j$ at key $k^\ast$ rejects,
+then $r^\ast:=k^\ast$, with its actual initial type, maps its run to an accepting path; conversely, an accepting path realizes to a word on which
+every component of $\mathcal A$ evolves as tracked and the copy at the realized $r^\ast$ rejects. No action is deleted: actions naming other keys stay
+as actions with key $\neq r^\ast$ and update $\mathcal A$ exactly, so $\mathcal A$'s guards need not be monotone. Nodes have polynomial size, so an
+on-the-fly search over all $j$, with a step counter bounded by the number of nodes, puts non-inclusion in \textsc{npspace}; by Savitch's theorem
+and closure under complement, inclusion is in \PSPACE{}.
+\emph{Hardness.} Let $\mathcal A$ be the one-state, register-free (E) component that allows every action; it is trim and $P_{\mathcal A}$ contains
+every trace, so $P_{\mathcal A}\subseteq P_{\mathcal B}$ iff $\mathcal B$ has no reachable bad state. Bad-prefix reachability is \PSPACE-hard already for
+one trim (E) component (proof of Theorem~\ref{thm:frag}), and \PSPACE{} is closed under complement, so inclusion is \PSPACE-hard.
+In \S\ref{sec:q5}, $\mathcal A$ is the session limit, a (V) component, and $\mathcal B$ is the per-recipient cap, a (K) component; that check is an instance.
+\end{proof}
+
+\begin{proposition}[Caps, quotas, and revocation: an \textsc{np}-complete core]\label{prop:core}
+Call an amount atom $x+v\bowtie c$ in the guard of a transition case (a cell of the guard partition for one control state and action
+type, with its target and updates) a \emph{cap check} if that case's update of $x$ contains the summand $v$ (so $x$ grows by at
+least $v$) or the case enters the absorbing bad state; completed missing cases enter the bad state, so their atoms are cap checks. Consider
+$\Th_0$ specifications without (E) components whose keys range over the equality sort (amount fields are read only by counter
+guards and updates, as in Proposition~\ref{prop:incl}) and in which every amount atom is a cap check. For them, bad-prefix
+reachability (nontriviality) is \textsc{np}-complete; it is \textsc{np}-hard already for one (V) component with unit increments and
+the constant $1$. When neither
+$\mathcal A$ nor $\mathcal B$ has (E) components, $\mathcal A$ has no (K) component, and every amount atom is a cap check, deciding
+$P_{\mathcal A}\subseteq P_{\mathcal B}$ for trim $\mathcal A,\mathcal B$ (Proposition~\ref{prop:incl}) is co\textsc{np}-complete. All these rules of Theorem~\ref{thm:frag} are of this form: per-recipient caps, bucket quotas, rate limits,
+no-send-after-revoke (its flag a (V) counter $\varrho$ with $\mathsf{revoke}:\varrho\mathrel{+}=1$ and $\mathsf{send}$ bad if $\varrho\ge1$, or
+a control bit of the (V) component), and fixed-vector quotas in which every case that tests a coordinate against a supplied amount
+$v$ either enters the bad state or adds $v$ to that coordinate. So are P2, P3, and the main-paper \S\ref{sec:q5} redundancy check. Several global rules (a session limit, a revocation
+flag, fixed-vector quotas) form one (V) component whose control is the product of theirs; the bounds are in the size of that
+merged component, set-once flags encoded as counters tested against $1$ keep it polynomial, and nontriviality alone needs no
+merging, since a disjunctive product is checked component by component. The cap-check hypothesis cannot be dropped: in one
+register-free (V) component, cells $x_h+v=K\wedge y_h+v=K-b$ test $x_h-y_h=b$, so each counter pair stores one rewritable bit, and
+with $K=2^{O(p(n))}$ in binary such a component simulates a polynomial-space Turing machine; without (E) components but with
+arbitrary amount atoms, bad-prefix reachability therefore stays \PSPACE-complete.
+\end{proposition}
+\begin{proof}
+\emph{Reduction to one counter component.} By the product argument and the one-witness projection in the proof of
+Theorem~\ref{thm:frag}, it suffices to decide whether the bad state of one component without registers and keys (a (V) component,
+or one local copy of a (K) component) is reachable. Such a component has finite control $Q$ and monotone counters $X$. For a counter
+$x$, let $c^x_1<\cdots<c^x_{m_x}$ be the constants of its atoms $x\bowtie c$ and $x+v\bowtie c$, and call the $m_x$ singletons
+$\{c^x_i\}$ and the nonempty gaps between consecutive constants (below the first, above the last), at most $2m_x+1$ sets in all,
+the \emph{regions} of $x$. An atom
+$x\bowtie c$ has one truth value on each region of $x$, and an atom $x+v\bowtie c$ has one truth value on each region containing
+$x+v$. A \emph{region vector} $r$ assigns each counter a region.
+
+\emph{Phases.} Updates are nonnegative, so along a run every counter visits its regions in increasing order, and the region vector
+changes at most $R=\sum_x 2m_x$ times; $R$ is polynomial in the specification although constants are binary. A run that reaches the
+bad state therefore splits into at most $R+1$ \emph{phases} of constant region vector, joined by at most $R$ \emph{boundary} steps (each
+changes some region) and followed by the final step into the bad state. Consider a step inside a phase with vector $r$ that takes
+case $t$. It does not enter the bad state, its pre- and post-values lie in $r$, and for every amount atom $x+v\bowtie c$ of its guard,
+a cap check, $t$ adds at least $v$ to $x$, so $x+v$ lies between the pre- and post-value of $x$ and hence in $r(x)$. Every atom of
+$t$'s guard thus has its value under $r$, so $t\in E_r$, the set of non-bad cases whose guard is true when each atom $x\bowtie c$ is
+evaluated at $r(x)$ and each $x+v\bowtie c$ with $x+v\in r(x)$; $E_r$ is computable in polynomial time from $r$. Phase $i$ ends in the
+source state of boundary case $i$, whose target starts phase $i+1$; the first phase starts in the initial state; empty phases are
+allowed; and cases that cannot stay in $r$ are forced to occur zero times by the end-value bounds.
+Conversely, take any path of cases in $E_r$ from control state $q$ to $q'$, with any nonnegative amounts, started from counter values in
+$r$: if the values after the path are still in $r$, then, as counters are monotone and regions are intervals, every intermediate
+value is in $r$, every guard on the path holds, and the path is executable.
+
+\emph{One existential Presburger formula.} A phase is thus described by its start and end control states, the Parikh vector
+$\varphi\in\mathbb N^{E_r}$ of a path between them, and, for each case $t$ and amount field $f$ of $t$, the total $A_{t,f}\ge 0$ supplied
+to $f$ over $t$'s occurrences ($A_{t,f}=0$ if $\varphi(t)=0$, and any value otherwise, since one occurrence may carry it all). End
+values are linear: $x^{\rm end}=x^{\rm start}+\sum_t\varphi(t)\,k_{t,x}+\sum_{t,f:\ t\text{ adds }f\text{ to }x}A_{t,f}$, with $k_{t,x}$
+the fixed increment. That $\varphi$ is the Parikh vector of a path from $q$ to $q'$ in the graph $E_r$ (flow conservation and
+connectivity of its support) has a polynomial-size existential Presburger definition \citep{verma2005parikh}. Guess the number of
+phases, their region vectors, start and end control states, the boundary cases, and the final case into the bad state; then require
+the phase constraints, membership of each phase's start and end values in its regions (interval bounds), the boundary and final
+updates with explicit amount variables, the boundary and final guards as Boolean combinations of linear atoms in those explicit values,
+and initial values $0$. By the two directions above, this polynomial-size existential Presburger formula is satisfiable iff the bad
+state is reachable, and satisfiability of such formulas is in \textsc{np} \citep{scarpellini1984presburger}. (Equivalently, with the guesses encoded by Boolean selector
+variables, reachability reduces to a single quantifier-free linear-integer-arithmetic query of the kind SMT solvers accept.) For inclusion, apply the same encoding to the product
+search in the proof of Proposition~\ref{prop:incl}. As $\Th_0$ has at most one (V) component and $\mathcal A$ has no (E) or (K) component,
+$\mathcal A$ is a single (V) component (or empty), so for each $j$ the product is one register-free counter component with control
+$Q_{\mathcal A}\times Q_{\mathcal B_j}$ and counters $X_{\mathcal A}\uplus X_{\mathcal B_j}$. If $\mathcal B_j$ is a (K) rule tracked at $r^\ast$, split each
+keyed action type into a copy naming $r^\ast$, where both components take a case, and a copy not naming it (or a keyless type), where
+$\mathcal A$ takes a case and the tracked copy is unchanged. Product cases are pairs of cases, so there are polynomially many, and amounts
+are shared within a step. Delete every product case in which $\mathcal A$ enters its bad state, including at the final step; the
+accepting cases are those in which the tracked copy enters its bad state. Every amount atom of a remaining non-accepting case comes from a
+case of $\mathcal A$ or $\mathcal B_j$ that does not enter its bad state, so it is a cap check; hence the phase argument applies,
+non-inclusion is in \textsc{np}, and inclusion is in co\textsc{np}. The restriction to one (V) component matters: if $\mathcal A$ could be a product of several
+register-free control components, non-inclusion would encode nonemptiness of an intersection of finite automata and be \PSPACE-hard.
+
+\emph{Hardness.} Reduce CNF satisfiability with variables $y_1,\ldots,y_n$ and clauses $C_1,\ldots,C_m$ to one (V) component with
+counters $x^T_i,x^F_i$, unit increments, and atoms comparing a counter with $1$. In control state $S$, actions $\mathsf{setT}_i$ and
+$\mathsf{setF}_i$ increment $x^T_i$ and $x^F_i$, respectively, and loop, and $\mathsf{go}$ moves to $K_1$. In $K_j$, the action $\mathsf{pick}_{j,\lambda}$ for
+a literal $\lambda$ of $C_j$ moves to $K_{j+1}$ if the counter of $\lambda$ ($x^T_i$ for $y_i$, $x^F_i$ for $\neg y_i$) is at least $1$, and to
+an absorbing good sink $G$ otherwise. In $L_i$ (with $L_1=K_{m+1}$), $\mathsf{cons}_i$ moves to $G$ if $x^T_i\ge1\wedge x^F_i\ge1$ and to
+$L_{i+1}$ otherwise, and in $L_{n+1}$ the action $\mathsf{fire}$ enters the bad state. Every other pair of control state and action moves
+to $G$, which loops on every action, so the guards partition every input and the component is total, deterministic, and trim. A word
+reaches the bad state iff the counters set before $\mathsf{go}$ define a consistent partial assignment that satisfies every clause, i.e.,
+iff the formula is satisfiable; the construction is polynomial (it also works as one (K) component in which every action type carries the key field; a witness names a single key).
+For inclusion, let $\mathcal A$ be the one-state (V) component with an empty counter vector whose single case loops on every
+action; it is total, deterministic, trim, and has no (E) or (K) component. As $P_{\mathcal A}$ contains every trace and $\mathcal B$ is trim,
+$P_{\mathcal A}\subseteq P_{\mathcal B}$ iff $\mathcal B$ has no reachable bad state, so inclusion is co\textsc{np}-hard.
+\end{proof}
+
+
+ 
